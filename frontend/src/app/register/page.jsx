@@ -1,20 +1,177 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
 export default function Register() {
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        role: ""
+    });
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log("Register attempt", formData);
+    };
+
     return (
-        <div className="max-w-md mx-auto py-20">
-            <h2 className="text-grotto text-3xl font-bold mb-6 text-center">Register</h2>
-            <form className="flex flex-col gap-4">
-                <input type="text" placeholder="Full Name" className="p-3 rounded bg-bluegray text-white" />
-                <input type="email" placeholder="Email" className="p-3 rounded bg-bluegray text-white" />
-                <input type="password" placeholder="Password" className="p-3 rounded bg-bluegray text-white" />
-                <select className="p-3 rounded bg-bluegray text-white">
-                    <option value="">Select Role</option>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <button className="bg-grotto py-3 rounded text-white hover:bg-navy">
-                    Register
-                </button>
-            </form>
+        <div className="min-h-screen sm:h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda] flex items-center justify-center px-4 sm:px-6 py-8 sm:py-0 relative overflow-hidden">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-10 sm:top-20 right-10 sm:right-20 w-48 h-48 sm:w-64 sm:h-64 bg-[#0d659d] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+                <div className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-48 h-48 sm:w-64 sm:h-64 bg-[#0c4160] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+            </div>
+
+            {/* Register Card */}
+            <div className="relative z-10 w-full max-w-md">
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6">
+                    {/* Logo/Brand */}
+                    <div className="text-center mb-4 sm:mb-5">
+                        <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#0d659d] to-[#0c4160] rounded-xl mb-2 sm:mb-3 shadow-lg">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4m0 0v8m0-8l4-4m0 12h4m0 0v-8m0 8l4 4m-4-12h4" />
+                            </svg>
+                        </div>
+                        <h2 className="text-[#0c4160] text-xl sm:text-2xl font-bold mb-1">Create Account</h2>
+                        <p className="text-[#738fa7] text-xs">Join VYBE and start your fitness journey</p>
+                    </div>
+
+                    {/* Register Form */}
+                    <div className="flex flex-col gap-2.5 sm:gap-3">
+                        {/* Full Name Input */}
+                        <div className="relative group">
+                            <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Full Name</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    placeholder="John Doe"
+                                    className="w-full pl-10 pr-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] placeholder-[#738fa7]/50 focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Email Input */}
+                        <div className="relative group">
+                            <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Email</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder="you@example.com"
+                                    className="w-full pl-10 pr-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] placeholder-[#738fa7]/50 focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Input */}
+                        <div className="relative group">
+                            <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Password</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder="Create a strong password"
+                                    className="w-full pl-10 pr-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] placeholder-[#738fa7]/50 focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Role Select */}
+                        <div className="relative group">
+                            <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Role</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <select
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 pr-8 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="">Select your role</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Terms Checkbox */}
+                        <label className="flex items-start gap-2 cursor-pointer group mt-1">
+                            <input type="checkbox" className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 rounded border-2 border-[#738fa7] text-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/20 cursor-pointer" />
+                            <span className="text-[#0c4160] text-xs leading-tight">
+                                I agree to the{" "}
+                                <Link href="/terms" className="text-[#0d659d] hover:text-[#0c4160] font-semibold transition-colors">
+                                    Terms & Conditions
+                                </Link>{" "}
+                                and{" "}
+                                <Link href="/privacy" className="text-[#0d659d] hover:text-[#0c4160] font-semibold transition-colors">
+                                    Privacy Policy
+                                </Link>
+                            </span>
+                        </label>
+
+                        {/* Register Button */}
+                        <button
+                            onClick={handleSubmit}
+                            className="relative group bg-gradient-to-r from-[#0d659d] to-[#0c4160] hover:from-[#0c4160] hover:to-[#0d659d] text-white py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mt-1"
+                        >
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                Create Account
+                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></span>
+                        </button>
+                    </div>
+
+                    {/* Login Link */}
+                    <div className="text-center mt-3 sm:mt-4">
+                        <p className="text-[#738fa7] text-xs">
+                            Already have an account?{" "}
+                            <Link href="/login" className="text-[#0d659d] hover:text-[#0c4160] font-semibold transition-colors">
+                                Log in
+                            </Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
