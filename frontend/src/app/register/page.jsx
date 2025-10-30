@@ -33,10 +33,14 @@ export default function Register() {
                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6">
                     {/* Logo/Brand */}
                     <div className="text-center mb-4 sm:mb-5">
-                        <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#0d659d] to-[#0c4160] rounded-xl mb-2 sm:mb-3 shadow-lg">
-                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4m0 0v8m0-8l4-4m0 12h4m0 0v-8m0 8l4 4m-4-12h4" />
-                            </svg>
+                        <div className="inline-flex items-center justify-center ">
+                            <div className="p-1.5 sm:p-2 rounded-xl border-[#0d659d] transition-all duration-300 group-hover:scale-110">
+                                <img
+                                    src="/logo.png"
+                                    alt="VYBE Logo"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-xl"
+                                />
+                            </div>
                         </div>
                         <h2 className="text-[#0c4160] text-xl sm:text-2xl font-bold mb-1">Create Account</h2>
                         <p className="text-[#738fa7] text-xs">Join VYBE and start your fitness journey</p>
@@ -101,33 +105,6 @@ export default function Register() {
                                     placeholder="Create a strong password"
                                     className="w-full pl-10 pr-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] placeholder-[#738fa7]/50 focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all"
                                 />
-                            </div>
-                        </div>
-
-                        {/* Role Select */}
-                        <div className="relative group">
-                            <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Role</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <select
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                    className="w-full pl-10 pr-8 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/10 outline-none transition-all appearance-none cursor-pointer"
-                                >
-                                    <option value="">Select your role</option>
-                                    <option value="user">User</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <svg className="w-4 h-4 text-[#738fa7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
                             </div>
                         </div>
 

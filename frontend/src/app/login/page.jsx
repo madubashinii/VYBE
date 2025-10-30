@@ -25,10 +25,14 @@ export default function Login() {
                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-6">
                     {/* Logo/Brand */}
                     <div className="text-center mb-5">
-                        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-[#0d659d] to-[#0c4160] rounded-xl mb-3 shadow-lg">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4m0 0v8m0-8l4-4m0 12h4m0 0v-8m0 8l4 4m-4-12h4" />
-                            </svg>
+                        <div className="inline-flex items-center justify-center ">
+                            <div className="p-1.5 sm:p-2 rounded-xl border-[#0d659d] transition-all duration-300 group-hover:scale-110">
+                                <img
+                                    src="/logo.png"
+                                    alt="VYBE Logo"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-xl"
+                                />
+                            </div>
                         </div>
                         <h2 className="text-[#0c4160] text-2xl font-bold mb-1">Welcome Back</h2>
                         <p className="text-[#738fa7] text-xs">Log in to continue your fitness journey</p>
