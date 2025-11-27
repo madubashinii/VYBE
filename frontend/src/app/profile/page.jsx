@@ -1,12 +1,3 @@
-// export default function Profile() {
-//     return (
-//         <div>
-//             <h1 className="text-grotto text-4xl font-bold mb-6">Profile</h1>
-//             <p className="text-cornflower">Edit user info, preferences, and view achievements.</p>
-//         </div>
-//     );
-// }
-
 "use client";
 
 import { useState } from "react";
@@ -126,8 +117,8 @@ export default function Profile() {
                     <button
                         onClick={() => setActiveTab("profile")}
                         className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === "profile"
-                                ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
-                                : "text-[#0c4160] hover:bg-white"
+                            ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
+                            : "text-[#0c4160] hover:bg-white"
                             }`}
                     >
                         Profile Info
@@ -135,8 +126,8 @@ export default function Profile() {
                     <button
                         onClick={() => setActiveTab("preferences")}
                         className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === "preferences"
-                                ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
-                                : "text-[#0c4160] hover:bg-white"
+                            ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
+                            : "text-[#0c4160] hover:bg-white"
                             }`}
                     >
                         Preferences
@@ -144,8 +135,8 @@ export default function Profile() {
                     <button
                         onClick={() => setActiveTab("achievements")}
                         className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === "achievements"
-                                ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
-                                : "text-[#0c4160] hover:bg-white"
+                            ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white shadow-lg"
+                            : "text-[#0c4160] hover:bg-white"
                             }`}
                     >
                         Achievements
@@ -337,8 +328,8 @@ export default function Profile() {
                                 <div
                                     key={achievement.id}
                                     className={`rounded-2xl shadow-lg p-6 border-2 transition-all hover:scale-105 ${achievement.unlocked
-                                            ? 'bg-gradient-to-br from-white to-[#c3ceda]/20 border-[#0d659d]/50'
-                                            : 'bg-white/50 border-[#c3ceda]/30 opacity-60'
+                                        ? 'bg-gradient-to-br from-white to-[#c3ceda]/20 border-[#0d659d]/50'
+                                        : 'bg-white/50 border-[#c3ceda]/30 opacity-60'
                                         }`}
                                 >
                                     <div className="text-5xl mb-3">{achievement.icon}</div>

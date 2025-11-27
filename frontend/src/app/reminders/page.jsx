@@ -1,12 +1,3 @@
-// export default function Reminders() {
-//     return (
-//         <div>
-//             <h1 className="text-grotto text-4xl font-bold mb-6">Reminders</h1>
-//             <p className="text-cornflower">Set email or push notifications and streak alerts here.</p>
-//         </div>
-//     );
-// }
-
 "use client";
 
 import { useState } from "react";
@@ -320,8 +311,8 @@ export default function Reminders() {
                                             key={day}
                                             onClick={() => toggleDay(day)}
                                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${newReminder.days.includes(day)
-                                                    ? 'bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white'
-                                                    : 'bg-[#c3ceda]/20 text-[#0c4160] hover:bg-[#c3ceda]/40'
+                                                ? 'bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white'
+                                                : 'bg-[#c3ceda]/20 text-[#0c4160] hover:bg-[#c3ceda]/40'
                                                 }`}
                                         >
                                             {day}
