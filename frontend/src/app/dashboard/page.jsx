@@ -61,7 +61,7 @@ export default function Dashboard() {
                         <p className="text-[#738fa7] text-sm">View improvements</p>
                     </Link>
 
-                    <Link href="/workout/history" className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all">
+                    <Link href="/history" className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all">
                         <h3 className="text-[#0c4160] text-lg font-bold mb-1">📅 History</h3>
                         <p className="text-[#738fa7] text-sm">Past workouts</p>
                     </Link>
