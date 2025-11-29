@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 
 export default function Register() {
+    const router = useRouter();
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -15,23 +20,33 @@ export default function Register() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Register attempt", formData);
+        try {
+            const response = await axios.post("http://localhost:5000/api/auth/register", formData);
+            console.log("Registration success:", response.data);
+            alert("Registered successfully!");
+            router.push("/login");
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+            alert(err.response?.data?.message || "Registration failed");
+        }
     };
+
 
     return (
         <div className="min-h-screen sm:h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda] flex items-center justify-center px-4 sm:px-6 py-8 sm:py-0 relative overflow-hidden">
-            {/* Background decorative elements */}
+
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-10 sm:top-20 right-10 sm:right-20 w-48 h-48 sm:w-64 sm:h-64 bg-[#0d659d] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-48 h-48 sm:w-64 sm:h-64 bg-[#0c4160] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             </div>
 
-            {/* Register Card */}
             <div className="relative z-10 w-full max-w-md">
                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-5 sm:p-6">
-                    {/* Logo/Brand */}
+
                     <div className="text-center mb-4 sm:mb-5">
                         <div className="inline-flex items-center justify-center ">
                             <div className="p-1.5 sm:p-2 rounded-xl border-[#0d659d] transition-all duration-300 group-hover:scale-110">
@@ -46,9 +61,8 @@ export default function Register() {
                         <p className="text-[#738fa7] text-xs">Join VYBE and start your fitness journey</p>
                     </div>
 
-                    {/* Register Form */}
                     <div className="flex flex-col gap-2.5 sm:gap-3">
-                        {/* Full Name Input */}
+
                         <div className="relative group">
                             <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Full Name</label>
                             <div className="relative">
@@ -68,7 +82,6 @@ export default function Register() {
                             </div>
                         </div>
 
-                        {/* Email Input */}
                         <div className="relative group">
                             <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Email</label>
                             <div className="relative">
@@ -88,7 +101,6 @@ export default function Register() {
                             </div>
                         </div>
 
-                        {/* Password Input */}
                         <div className="relative group">
                             <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Password</label>
                             <div className="relative">
@@ -108,7 +120,6 @@ export default function Register() {
                             </div>
                         </div>
 
-                        {/* Terms Checkbox */}
                         <label className="flex items-start gap-2 cursor-pointer group mt-1">
                             <input type="checkbox" className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 rounded border-2 border-[#738fa7] text-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/20 cursor-pointer" />
                             <span className="text-[#0c4160] text-xs leading-tight">
@@ -123,7 +134,6 @@ export default function Register() {
                             </span>
                         </label>
 
-                        {/* Register Button */}
                         <button
                             onClick={handleSubmit}
                             className="relative group bg-gradient-to-r from-[#0d659d] to-[#0c4160] hover:from-[#0c4160] hover:to-[#0d659d] text-white py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mt-1"
@@ -138,7 +148,6 @@ export default function Register() {
                         </button>
                     </div>
 
-                    {/* Login Link */}
                     <div className="text-center mt-3 sm:mt-4">
                         <p className="text-[#738fa7] text-xs">
                             Already have an account?{" "}

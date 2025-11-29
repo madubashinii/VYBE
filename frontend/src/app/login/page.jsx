@@ -2,28 +2,42 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Login attempt", { email, password });
+        try {
+            const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+            console.log("Login success:", response.data);
+
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+
+            alert("Login successful!");
+            router.push("/dashboard");
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+            alert(err.response?.data?.message || "Login failed");
+        }
     };
 
     return (
         <div className="h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda] flex items-center justify-center px-6 relative overflow-hidden">
-            {/* Background decorative elements */}
+
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 right-20 w-64 h-64 bg-[#0d659d] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#0c4160] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             </div>
 
-            {/* Login Card */}
             <div className="relative z-10 max-w-md w-full">
                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-6">
-                    {/* Logo/Brand */}
+
                     <div className="text-center mb-5">
                         <div className="inline-flex items-center justify-center ">
                             <div className="p-1.5 sm:p-2 rounded-xl border-[#0d659d] transition-all duration-300 group-hover:scale-110">
@@ -40,7 +54,7 @@ export default function Login() {
 
                     {/* Login Form */}
                     <div className="flex flex-col gap-3">
-                        {/* Email Input */}
+
                         <div className="relative group">
                             <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Email</label>
                             <div className="relative">
@@ -59,7 +73,6 @@ export default function Login() {
                             </div>
                         </div>
 
-                        {/* Password Input */}
                         <div className="relative group">
                             <label className="block text-[#0c4160] text-xs font-semibold mb-1.5">Password</label>
                             <div className="relative">
@@ -78,7 +91,6 @@ export default function Login() {
                             </div>
                         </div>
 
-                        {/* Remember Me & Forgot Password */}
                         <div className="flex items-center justify-between text-xs">
                             <label className="flex items-center gap-1.5 cursor-pointer group">
                                 <input type="checkbox" className="w-3.5 h-3.5 rounded border-2 border-[#738fa7] text-[#0d659d] focus:ring-2 focus:ring-[#0d659d]/20 cursor-pointer" />
@@ -89,7 +101,6 @@ export default function Login() {
                             </Link>
                         </div>
 
-                        {/* Login Button */}
                         <button
                             onClick={handleSubmit}
                             className="relative group bg-gradient-to-r from-[#0d659d] to-[#0c4160] hover:from-[#0c4160] hover:to-[#0d659d] text-white py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mt-1"
@@ -104,7 +115,6 @@ export default function Login() {
                         </button>
                     </div>
 
-                    {/* Sign Up Link */}
                     <div className="text-center mt-4">
                         <p className="text-[#738fa7] text-xs">
                             Don't have an account?{" "}
