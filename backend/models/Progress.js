@@ -6,6 +6,7 @@ const progressSchema = new Schema({
     current: String,
     target: String,
     progressPercent: Number,
+    caloriesBurned: Number,
     dateRecorded: { type: Date, default: Date.now }
 });
 
