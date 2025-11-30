@@ -30,16 +30,48 @@ export default function CreatePlan() {
         ));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Plan Created:", { planData, exercises });
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in first!");
+                return;
+            }
+
+            const res = await fetch("http://localhost:5000/api/plans", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    ...planData,
+                    exercises: exercises
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Plan created successfully!");
+                window.location.href = "/dashboard";
+            } else {
+                alert(data.error || "Failed to create plan");
+            }
+
+        } catch (error) {
+            console.log("Error:", error);
+            alert("Something went wrong");
+        }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda]">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* Header */}
                 <div className="mb-8">
                     <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#0c4160] hover:text-[#0d659d] font-semibold mb-4">
                         ←  Back to Dashboard
@@ -48,10 +80,8 @@ export default function CreatePlan() {
                     <p className="text-[#0c4160]/70 text-lg">Design your workout routine</p>
                 </div>
 
-                {/* Main Form */}
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-white/20 mb-6">
 
-                    {/* Plan Details */}
                     <div className="mb-8">
                         <h2 className="text-[#0c4160] text-xl font-bold mb-4">Plan Details</h2>
 
@@ -105,7 +135,7 @@ export default function CreatePlan() {
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 >
                                     <option value="">Select your goal</option>
-                                    <option value="strength">Build Strength 💪</option>
+                                    <option value="strength">Build Strength</option>
                                     <option value="muscle">Gain Muscle</option>
                                     <option value="weight-loss">Lose Weight</option>
                                     <option value="endurance">Improve Endurance</option>
@@ -198,7 +228,6 @@ export default function CreatePlan() {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
                     <button
                         onClick={handleSubmit}
                         className="w-full bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all"
@@ -207,7 +236,6 @@ export default function CreatePlan() {
                     </button>
                 </div>
 
-                {/* Tips */}
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#c3ceda]">
                     <h3 className="text-[#0c4160] font-bold mb-2">💡 Tips</h3>
                     <ul className="text-[#0c4160]/80 text-sm space-y-1">

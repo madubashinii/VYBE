@@ -65,9 +65,7 @@ export default function Dashboard() {
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 
-                setStats(statsRes.data);
-
-
+                setStats(statsRes.data.stats || statsRes.data);
 
             } catch (err) {
                 console.log(err.response?.data || err.message);
@@ -83,7 +81,6 @@ export default function Dashboard() {
         <div className="min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda]">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-[#0c4160] text-4xl font-bold mb-2">
                         Welcome Back, <span className="bg-gradient-to-r from-[#0d659d] to-[#0c4160] bg-clip-text text-transparent">{user?.name}</span> 👋
@@ -91,7 +88,6 @@ export default function Dashboard() {
                     <p className="text-[#0c4160]/80 text-lg">Track your fitness journey</p>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-white/20">
                         <p className="text-[#738fa7] text-xs font-semibold uppercase mb-1">Workouts</p>
@@ -158,7 +154,6 @@ export default function Dashboard() {
                 </div>
 
                 {/* recent workouts */}
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {recentWorkouts.map((ex, idx) => (
                         <div key={idx} className="bg-gradient-to-br from-[#0c4160] to-[#0d659d] rounded-2xl shadow-lg p-5 border border-[#738fa7]/20">
