@@ -89,7 +89,14 @@ router.get("/stats", auth, async (req, res) => {
             }
         }
 
-        const rank = avgProgress > 0 ? Math.max(1, 100 - avgProgress) : 100;
+        const all = await Progress.aggregate([
+            { $group: { _id: "$userId", avg: { $avg: "$progressPercent" } } },
+            { $sort: { avg: -1 } }
+        ]);
+
+        const index = all.findIndex(u => u._id.toString() === req.user.id);
+        const rank = index === -1 ? all.length : index + 1;
+
 
         res.json({ totalUpdates, avgProgress, streak, rank });
     } catch (err) {
