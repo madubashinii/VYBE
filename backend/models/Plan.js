@@ -1,11 +1,11 @@
 import { Schema, model } from "mongoose";
 
 const exerciseSchema = new Schema({
-    name: String,
+    exercise: String,
     sets: Number,
     reps: Number,
     day: String,
-});
+}, { _id: true });
 
 const planSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
