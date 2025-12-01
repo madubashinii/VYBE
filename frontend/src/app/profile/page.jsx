@@ -1,41 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../services/api";
 import Link from "next/link";
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState("profile");
     const [profileData, setProfileData] = useState({
-        name: "John Doe",
-        email: "john.doe@example.com",
-        age: "28",
-        weight: "175",
-        height: "5'10\"",
-        goal: "Build Muscle",
-        experience: "Intermediate"
+        name: "",
+        email: "",
+        age: 0,
+        weight: 0,
+        height: 0
     });
-
     const [preferences, setPreferences] = useState({
         units: "imperial",
         notifications: true,
-        publicProfile: false
+        publicProfile: true,
     });
 
-    const achievements = [
-        { id: 1, title: "First Workout", description: "Complete your first workout", icon: "🏆", unlocked: true, date: "Oct 1" },
-        { id: 2, title: "7 Day Streak", description: "Maintain a 7-day workout streak", icon: "🔥", unlocked: true, date: "Oct 7" },
-        { id: 3, title: "100 Workouts", description: "Complete 100 total workouts", icon: "💯", unlocked: false, progress: 45, total: 100 },
-        { id: 4, title: "PR Crusher", description: "Set 10 personal records", icon: "💪", unlocked: true, date: "Oct 15" },
-        { id: 5, title: "Early Bird", description: "Complete 5 workouts before 7 AM", icon: "🌅", unlocked: false, progress: 2, total: 5 },
-        { id: 6, title: "Marathon", description: "Log 50+ hours of workouts", icon: "⏱️", unlocked: false, progress: 32, total: 50 }
-    ];
+    const [achievements, setAchievements] = useState([]);
+    const [plan, setPlan] = useState(null);
 
-    const handleSaveProfile = () => {
-        alert("Profile updated successfully!");
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const res = await api.get("/auth/profile", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                const { profile, preferences, achievements, plan } = res.data;
+
+                setProfileData(profile);
+                setPreferences(preferences);
+                setAchievements(achievements);
+                setPlan(plan);
+            } catch (err) {
+                console.error("Failed to fetch profile:", err);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleSaveProfile = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            await api.put("/auth/profile", profileData, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            alert("Profile updated successfully!");
+        } catch (err) {
+            console.error("Failed to update profile:", err);
+            alert("Failed to update profile.");
+        }
     };
 
-    const handleSavePreferences = () => {
-        alert("Preferences saved!");
+    const handleSavePreferences = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            await api.put("/auth/preferences", preferences, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            alert("Preferences saved successfully!");
+        } catch (err) {
+            console.error("Failed to update preferences:", err);
+            alert("Failed to save preferences.");
+        }
     };
 
     return (
@@ -48,11 +88,11 @@ export default function Profile() {
                     </Link>
                     <div className="flex items-center gap-6">
                         <div className="w-20 h-20 bg-gradient-to-br from-[#0d659d] to-[#0c4160] rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-xl">
-                            {profileData.name.charAt(0)}
+                            {profileData?.name.charAt(0)}
                         </div>
                         <div>
-                            <h1 className="text-[#0c4160] text-4xl font-bold mb-1">{profileData.name}</h1>
-                            <p className="text-[#738fa7] text-lg">{profileData.email}</p>
+                            <h1 className="text-[#0c4160] text-4xl font-bold mb-1">{profileData?.name}</h1>
+                            <p className="text-[#738fa7] text-lg">{profileData?.email}</p>
                         </div>
                     </div>
                 </div>
@@ -96,7 +136,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Full Name</label>
                                 <input
                                     type="text"
-                                    value={profileData.name}
+                                    value={profileData?.name}
                                     onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 />
@@ -105,7 +145,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Email</label>
                                 <input
                                     type="email"
-                                    value={profileData.email}
+                                    value={profileData?.email}
                                     onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 />
@@ -114,7 +154,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Age</label>
                                 <input
                                     type="number"
-                                    value={profileData.age}
+                                    value={profileData?.age}
                                     onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 />
@@ -123,7 +163,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Weight (lbs)</label>
                                 <input
                                     type="number"
-                                    value={profileData.weight}
+                                    value={profileData?.weight}
                                     onChange={(e) => setProfileData({ ...profileData, weight: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 />
@@ -132,7 +172,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Height</label>
                                 <input
                                     type="text"
-                                    value={profileData.height}
+                                    value={profileData?.height}
                                     onChange={(e) => setProfileData({ ...profileData, height: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 />
@@ -140,8 +180,8 @@ export default function Profile() {
                             <div>
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Experience</label>
                                 <select
-                                    value={profileData.experience}
-                                    onChange={(e) => setProfileData({ ...profileData, experience: e.target.value })}
+                                    value={plan?.difficulty ?? "Beginner"}
+                                    onChange={(e) => setPlan({ ...plan, difficulty: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 >
                                     <option value="Beginner">Beginner</option>
@@ -152,8 +192,8 @@ export default function Profile() {
                             <div className="sm:col-span-2">
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Fitness Goal</label>
                                 <select
-                                    value={profileData.goal}
-                                    onChange={(e) => setProfileData({ ...profileData, goal: e.target.value })}
+                                    value={plan?.goal ?? "General Fitness"}
+                                    onChange={(e) => setPlan({ ...plan, goal: e.target.value })}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 >
                                     <option value="Build Muscle">Build Muscle</option>
@@ -173,7 +213,7 @@ export default function Profile() {
                     </div>
                 )}
 
-                {/* Preferences Tab */}
+                {/* preferences*/}
                 {activeTab === "preferences" && (
                     <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-6 sm:p-8 border border-white/20">
                         <h2 className="text-[#0c4160] text-2xl font-bold mb-6">App Preferences</h2>
@@ -184,7 +224,7 @@ export default function Profile() {
                                     <p className="text-[#738fa7] text-sm">Imperial or Metric</p>
                                 </div>
                                 <select
-                                    value={preferences.units}
+                                    value={preferences?.units || "imperial"}
                                     onChange={(e) => setPreferences({ ...preferences, units: e.target.value })}
                                     className="px-4 py-2 bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] font-semibold focus:border-[#0d659d] outline-none"
                                 >
@@ -232,7 +272,7 @@ export default function Profile() {
                     </div>
                 )}
 
-                {/* Achievements Tab */}
+                {/* achievements*/}
                 {activeTab === "achievements" && (
                     <div className="space-y-4">
                         <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/20 mb-6">
@@ -244,7 +284,9 @@ export default function Profile() {
                                     </p>
                                 </div>
                                 <div className="text-4xl font-bold text-[#0d659d]">
-                                    {Math.round((achievements.filter(a => a.unlocked).length / achievements.length) * 100)}%
+                                    {achievements.length > 0
+                                        ? Math.round((achievements.filter(a => a.unlocked).length / achievements.length) * 100)
+                                        : 0}%
                                 </div>
                             </div>
                         </div>
@@ -271,7 +313,7 @@ export default function Profile() {
                                             <div className="w-full bg-[#c3ceda]/30 rounded-full h-2 mb-2">
                                                 <div
                                                     className="bg-gradient-to-r from-[#0d659d] to-[#0c4160] h-2 rounded-full"
-                                                    style={{ width: `${(achievement.progress / achievement.total) * 100}%` }}
+                                                    style={{ width: `${achievement.total ? (achievement.progress / achievement.total) * 100 : 0}%` }}
                                                 />
                                             </div>
                                             <p className="text-[#738fa7] text-xs font-semibold">
