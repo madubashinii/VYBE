@@ -1,18 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import api from "../../services/api";
 
-const workoutHistory = [
-    { id: 1, exercise: "Push Ups", sets: 3, reps: 15, date: "2025-10-07", duration: 25, calories: 180, type: "Strength" },
-    { id: 2, exercise: "Squats", sets: 4, reps: 12, date: "2025-10-06", duration: 30, calories: 220, type: "Strength" },
-    { id: 3, exercise: "Plank", sets: 2, reps: 60, date: "2025-10-05", duration: 15, calories: 100, type: "Core" },
-    { id: 4, exercise: "Running", sets: 1, reps: 1, date: "2025-10-05", duration: 45, calories: 400, type: "Cardio" },
-    { id: 5, exercise: "Bench Press", sets: 4, reps: 10, date: "2025-10-04", duration: 35, calories: 250, type: "Strength" },
-    { id: 6, exercise: "Yoga Flow", sets: 1, reps: 1, date: "2025-10-03", duration: 60, calories: 180, type: "Flexibility" },
-    { id: 7, exercise: "Deadlift", sets: 3, reps: 8, date: "2025-10-03", duration: 30, calories: 280, type: "Strength" },
-    { id: 8, exercise: "Cycling", sets: 1, reps: 1, date: "2025-10-02", duration: 50, calories: 450, type: "Cardio" },
-];
 
 function WorkoutCard({ workout, onDelete }) {
     const typeColors = {
@@ -36,7 +27,7 @@ function WorkoutCard({ workout, onDelete }) {
                         </div>
                     </div>
                     <button
-                        onClick={() => onDelete(workout.id)}
+                        onClick={() => onDelete(workout._id)}
                         className="text-red-500 hover:text-red-700 transition-colors"
                     >
                         Delete
@@ -74,27 +65,115 @@ function WorkoutCard({ workout, onDelete }) {
 }
 
 export default function WorkoutHistory() {
-    const [workouts, setWorkouts] = useState(workoutHistory);
+    const [workouts, setWorkouts] = useState([]);
     const [filterType, setFilterType] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(true);
 
-    const deleteWorkout = (id) => {
-        if (confirm("Delete this workout?")) {
-            setWorkouts(workouts.filter(w => w.id !== id));
+    const determineType = (exerciseName) => {
+        const strength = ["Bench Press", "Squats", "Deadlift", "Push Ups", "Bicep Curl", "Shoulder Press"];
+        const cardio = ["Running", "Cycling", "Jump Rope", "Rowing"];
+        const core = ["Plank", "Leg Raises", "Russian Twist"];
+        const flexibility = ["Yoga Flow", "Hamstring Stretch", "Shoulder Stretch", "Quad Stretch"];
+
+        if (strength.includes(exerciseName)) return "Strength";
+        if (cardio.includes(exerciseName)) return "Cardio";
+        if (core.includes(exerciseName)) return "Core";
+        if (flexibility.includes(exerciseName)) return "Flexibility";
+        return "Strength";
+    };
+
+    const estimateDuration = (exercise, sets, reps) => {
+        const type = determineType(exercise);
+        let minutesPerSet = 2;
+
+        if (type === "Cardio") minutesPerSet = 15;
+        if (type === "Core") minutesPerSet = 1.5;
+        if (type === "Flexibility") minutesPerSet = 2;
+        if (type === "Strength") minutesPerSet = 2;
+
+        return Math.round(sets * minutesPerSet);
+    };
+
+    const estimateCalories = (exercise, duration) => {
+        const type = determineType(exercise);
+        let calPerMin = 5;
+
+        if (type === "Strength") calPerMin = 6;
+        if (type === "Cardio") calPerMin = 10;
+        if (type === "Core") calPerMin = 5;
+        if (type === "Flexibility") calPerMin = 3;
+
+        return Math.round(calPerMin * duration);
+    };
+
+    useEffect(() => {
+        const fetchWorkouts = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const res = await api.get("/plans", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                const data = res.data;
+
+                const allExercises = data.flatMap(plan =>
+                    plan.exercises.map(ex => {
+                        const type = determineType(ex.exercise);
+                        const duration = estimateDuration(ex.exercise, ex.sets, ex.reps);
+                        const calories = estimateCalories(ex.exercise, duration);
+                        return { ...ex, type, duration, calories, date: ex.date || new Date().toISOString() };
+                    })
+                );
+
+                setWorkouts(allExercises);
+            } catch (err) {
+                console.log("Error fetching workouts:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchWorkouts();
+    }, []);
+
+
+    const deleteWorkout = async (id) => {
+        if (!confirm("Delete this workout?")) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            // find the plan containing the exercise
+            const res = await api.get("/plans", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const plans = res.data;
+            const planContainingExercise = plans.find(plan => plan.exercises.some(ex => ex._id === id));
+
+            if (!planContainingExercise) return;
+
+            // delete the exercise
+            await api.delete(`/plans/${planContainingExercise._id}/exercises/${id}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            setWorkouts(prev => prev.filter(w => w._id !== id));
+        } catch (err) {
+            console.error("Error deleting workout:", err);
         }
     };
 
     const filteredWorkouts = workouts.filter(w => {
         const matchesType = filterType === "all" || w.type === filterType;
-        const matchesSearch = w.exercise.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = w.exercise?.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesType && matchesSearch;
     });
 
-    const totalStats = {
-        workouts: workouts.length,
-        calories: workouts.reduce((sum, w) => sum + w.calories, 0),
-        duration: workouts.reduce((sum, w) => sum + w.duration, 0)
-    };
+    if (loading) return <p className="text-center mt-10 text-[#0c4160] font-bold">Loading workouts...</p>;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda]">
@@ -110,34 +189,12 @@ export default function WorkoutHistory() {
                             <h1 className="text-[#0c4160] text-4xl font-bold mb-2">Workout History 📖</h1>
                             <p className="text-[#0c4160]/70 text-lg">Review your past workouts</p>
                         </div>
-                        {/* <Link href="/workout/log" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all">
-                            + Log Workout
-                        </Link> */}
                     </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-lg border border-white/20">
-                        <p className="text-[#738fa7] text-xs font-semibold uppercase mb-1">Workouts</p>
-                        <p className="text-[#0c4160] text-3xl font-bold">{totalStats.workouts}</p>
-                    </div>
-
-                    <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-lg border border-white/20">
-                        <p className="text-[#738fa7] text-xs font-semibold uppercase mb-1">Calories</p>
-                        <p className="text-[#0c4160] text-3xl font-bold">{totalStats.calories.toLocaleString()}</p>
-                    </div>
-
-                    <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-lg border border-white/20">
-                        <p className="text-[#738fa7] text-xs font-semibold uppercase mb-1">Time</p>
-                        <p className="text-[#0c4160] text-3xl font-bold">{totalStats.duration}m</p>
-                    </div>
-                </div>
-
-                {/* Filters */}
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-6 border border-white/20">
                     <div className="flex flex-col lg:flex-row gap-4">
-                        {/* Search */}
+
                         <div className="flex-1">
                             <input
                                 type="text"
@@ -148,7 +205,6 @@ export default function WorkoutHistory() {
                             />
                         </div>
 
-                        {/* Type Filter */}
                         <div className="flex gap-2 flex-wrap">
                             {["all", "Strength", "Cardio", "Core", "Flexibility"].map(type => (
                                 <button
@@ -172,11 +228,11 @@ export default function WorkoutHistory() {
                     </div>
                 </div>
 
-                {/* Workout List */}
+                {/* workout List */}
                 {filteredWorkouts.length > 0 ? (
                     <div className="space-y-4">
                         {filteredWorkouts.map(workout => (
-                            <WorkoutCard key={workout.id} workout={workout} onDelete={deleteWorkout} />
+                            <WorkoutCard key={workout._id} workout={workout} onDelete={deleteWorkout} />
                         ))}
                     </div>
                 ) : (

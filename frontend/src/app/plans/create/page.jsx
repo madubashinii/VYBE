@@ -13,11 +13,11 @@ export default function CreatePlan() {
     });
 
     const [exercises, setExercises] = useState([
-        { id: 1, name: "", sets: "", reps: "", day: "" }
+        { id: 1, exercise: "", sets: "", reps: "", day: "" }
     ]);
 
     const addExercise = () => {
-        setExercises([...exercises, { id: Date.now(), name: "", sets: "", reps: "", day: "" }]);
+        setExercises([...exercises, { id: Date.now(), exercise: "", sets: "", reps: "", day: "" }]);
     };
 
     const removeExercise = (id) => {
@@ -155,7 +155,6 @@ export default function CreatePlan() {
                         </div>
                     </div>
 
-                    {/* Exercises */}
                     <div className="mb-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-[#0c4160] text-xl font-bold">Exercises</h2>
@@ -185,32 +184,62 @@ export default function CreatePlan() {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <input
-                                            type="text"
-                                            value={exercise.name}
-                                            onChange={(e) => updateExercise(exercise.id, 'name', e.target.value)}
-                                            placeholder="Exercise name"
+                                        <select
+                                            value={exercise.exercise}
+                                            onChange={(e) => updateExercise(exercise.id, "exercise", e.target.value)}
                                             className="w-full px-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] outline-none"
-                                        />
+                                        >
+                                            <option value="">Select Exercise</option>
+
+                                            <optgroup label="Strength">
+                                                <option value="Bench Press">Bench Press</option>
+                                                <option value="Squats">Squats</option>
+                                                <option value="Deadlift">Deadlift</option>
+                                                <option value="Shoulder Press">Shoulder Press</option>
+                                                <option value="Bicep Curl">Bicep Curl</option>
+                                            </optgroup>
+
+                                            <optgroup label="Cardio">
+                                                <option value="Running">Running</option>
+                                                <option value="Cycling">Cycling</option>
+                                                <option value="Jump Rope">Jump Rope</option>
+                                                <option value="Rowing">Rowing</option>
+                                            </optgroup>
+
+                                            <optgroup label="Core">
+                                                <option value="Plank">Plank</option>
+                                                <option value="Leg Raises">Leg Raises</option>
+                                                <option value="Russian Twist">Russian Twist</option>
+                                            </optgroup>
+
+                                            <optgroup label="Flexibility">
+                                                <option value="Hamstring Stretch">Hamstring Stretch</option>
+                                                <option value="Shoulder Stretch">Shoulder Stretch</option>
+                                                <option value="Quad Stretch">Quad Stretch</option>
+                                            </optgroup>
+                                        </select>
+
                                         <div className="grid grid-cols-2 gap-3">
                                             <input
                                                 type="number"
                                                 value={exercise.sets}
-                                                onChange={(e) => updateExercise(exercise.id, 'sets', e.target.value)}
+                                                onChange={(e) => updateExercise(exercise.id, "sets", e.target.value)}
                                                 placeholder="Sets"
                                                 className="w-full px-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] outline-none"
                                             />
+
                                             <input
                                                 type="number"
                                                 value={exercise.reps}
-                                                onChange={(e) => updateExercise(exercise.id, 'reps', e.target.value)}
+                                                onChange={(e) => updateExercise(exercise.id, "reps", e.target.value)}
                                                 placeholder="Reps"
                                                 className="w-full px-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] outline-none"
                                             />
                                         </div>
+
                                         <select
                                             value={exercise.day}
-                                            onChange={(e) => updateExercise(exercise.id, 'day', e.target.value)}
+                                            onChange={(e) => updateExercise(exercise.id, "day", e.target.value)}
                                             className="w-full px-3 py-2 text-sm bg-white border-2 border-[#c3ceda] rounded-lg text-[#0c4160] focus:border-[#0d659d] outline-none"
                                         >
                                             <option value="">Select day</option>

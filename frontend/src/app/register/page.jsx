@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
+import api from "../../services/api";
 
 export default function Register() {
     const [step, setStep] = useState(1);
@@ -22,8 +22,8 @@ export default function Register() {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post(
-                "http://localhost:5000/api/auth/register",
+            const response = await api.post(
+                "/auth/register",
                 formData
             );
             localStorage.setItem("token", response.data.token);
@@ -64,7 +64,7 @@ export default function Register() {
                         </p>
                     </div>
 
-                    {/* Account Info */}
+                    {/* account Info */}
                     {step === 1 && (
                         <div className="flex flex-col gap-2.5 sm:gap-3">
 
@@ -144,7 +144,7 @@ export default function Register() {
 
                         </div>
                     )}
-                    {/* Personal Info */}
+                    {/* personal Info */}
                     {step === 2 && (
                         <div className="flex flex-col gap-2.5 sm:gap-3">
 

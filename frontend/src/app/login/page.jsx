@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
@@ -13,7 +13,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+            const response = await api.post("/auth/login", { email, password });
             console.log("Login success:", response.data);
 
             localStorage.setItem("token", response.data.token);
