@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { useIsLoggedIn, useLogout } from "../services/auth";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef(null);
+    const loggedIn = useIsLoggedIn();
+    const logout = useLogout();
+
 
     // Close profile menu when clicking outside
     useEffect(() => {
@@ -24,7 +28,7 @@ export default function Navbar() {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#738fa7] to-transparent opacity-60"></div>
 
             <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex justify-between items-center max-w-7xl mx-auto">
-                {/* Logo */}
+
                 <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
                     <div className="p-1.5 sm:p-2 rounded-xl border-[#0d659d] transition-all duration-300 group-hover:scale-110">
                         <img
@@ -40,46 +44,50 @@ export default function Navbar() {
 
                 <div className="hidden lg:flex items-center gap-2">
                     <NavItem href="/" label="Home" />
-                    <NavItem href="/dashboard" label="Dashboard" />
+                    {loggedIn && <NavItem href="/dashboard" label="Dashboard" />}
 
-                    <div className="relative" ref={profileMenuRef}>
-                        <button
-                            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </button>
+                    {loggedIn && (
+                        <div className="relative" ref={profileMenuRef}>
+                            <button
+                                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </button>
 
-                        {profileMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-[#c3ceda]/30 overflow-hidden">
-                                <Link
-                                    href="/profile"
-                                    onClick={() => setProfileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-[#0c4160] hover:bg-[#c3ceda]/20 transition-colors"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    <span className="font-medium">My Account</span>
-                                </Link>
-                                <Link
-                                    href="/"
-                                    onClick={() => setProfileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors border-t border-[#c3ceda]/30"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    <span className="font-medium">Logout</span>
-                                </Link>
-                            </div>
-                        )}
-                    </div>
+                            {profileMenuOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-[#c3ceda]/30 overflow-hidden">
+                                    <Link
+                                        href="/profile"
+                                        onClick={() => setProfileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3 text-[#0c4160] hover:bg-[#c3ceda]/20 transition-colors"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span className="font-medium">My Account</span>
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            setProfileMenuOpen(false);
+                                        }}
+                                        className="flex items-center gap-3 px-4 py-3 w-full text-left text-red-600 hover:bg-red-50 transition-colors border-t border-[#c3ceda]/30"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span className="font-medium">Logout</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                 </div>
 
-                {/* Mobile Menu Button */}
                 <button
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -104,10 +112,30 @@ export default function Navbar() {
             >
                 <div className="px-4 pb-4 space-y-2 bg-[#0c4160]/50 backdrop-blur-sm">
                     <MobileLink href="/" label="Home" onClick={() => setMobileMenuOpen(false)} />
-                    <MobileLink href="/dashboard" label="Dashboard" onClick={() => setMobileMenuOpen(false)} />
+                    {loggedIn && (
+                        <MobileLink href="/dashboard" label="Dashboard" onClick={() => setMobileMenuOpen(false)} />
+                    )}
                     <div className="border-t border-[#738fa7]/30 my-2"></div>
-                    <MobileLink href="/profile" label="My Account" onClick={() => setMobileMenuOpen(false)} icon="profile" />
-                    <MobileLink href="/" label="Logout" onClick={() => setMobileMenuOpen(false)} icon="logout" />
+
+                    {loggedIn ? (
+                        <>
+                            <MobileLink href="/profile" label="My Account" onClick={() => setMobileMenuOpen(false)} icon="profile" />
+                            <button
+                                onClick={() => {
+                                    logout();
+                                    setMobileMenuOpen(false);
+                                }}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 font-medium hover:bg-red-50 transition-all w-full text-left"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
+                        </>
+                    ) : (
+                        <MobileLink href="/auth/login" label="Login" />
+                    )}
                 </div>
             </div>
 
