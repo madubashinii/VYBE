@@ -7,7 +7,7 @@ const router = Router();
 // add progress
 router.post("/", auth, async (req, res) => {
     try {
-        const { exerciseName, current, target } = req.body;
+        const { exerciseName, current, target, caloriesBurned } = req.body;
 
         if (!exerciseName || !current || !target) {
             return res.status(400).json({ message: "Missing fields" });
@@ -20,7 +20,8 @@ router.post("/", auth, async (req, res) => {
             exerciseName,
             current,
             target,
-            progressPercent: percent
+            progressPercent: percent,
+            caloriesBurned
         });
 
         await newProgress.save();
@@ -134,7 +135,7 @@ router.get("/weekly", auth, async (req, res) => {
     }
 });
 
-// get personal records: best progressPercent per exercise
+// get personal records
 router.get("/pr", auth, async (req, res) => {
     try {
         const range = req.query.range || "week";
@@ -171,6 +172,18 @@ router.get("/pr", auth, async (req, res) => {
     }
 });
 
+router.delete("/:id", auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const workout = await Progress.findOne({ _id: id, userId: req.user.id });
+        if (!workout) return res.status(404).json({ message: "Workout not found" });
+
+        await workout.deleteOne();
+        res.json({ message: "Workout deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 
 export default router;
