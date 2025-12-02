@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
-import { getPlans } from "../services/plansApi";
-import { getProgress, getStats } from "../services/progressApi";
+import { getPlans } from "../../services/plansApi";
+import { getProgress, getStats } from "../../services/progressApi";
 
 export default function Dashboard() {
 

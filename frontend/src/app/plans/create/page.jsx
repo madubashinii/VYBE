@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createPlan } from "../services/plansApi";
+import { createPlan } from "../../services/plansApi";
 
 export default function CreatePlan() {
     const [planData, setPlanData] = useState({
