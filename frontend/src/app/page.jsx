@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function Home() {
     return (
         <div className="relative min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda] overflow-hidden">
-            {/* Animated background elements */}
+
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-[#0d659d] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-72 h-72 bg-[#0c4160] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-700"></div>
@@ -13,9 +13,9 @@ export default function Home() {
             </div>
 
             <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
-                {/* Hero Section */}
+
                 <section className="text-center max-w-3xl py-20">
-                    {/* Floating badge */}
+
                     <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg mb-8 animate-bounce">
                         <span className="w-2 h-2 bg-gradient-to-r from-[#0d659d] to-[#738fa7] rounded-full animate-pulse"></span>
                         <span className="text-[#0c4160] text-sm font-semibold">Your Fitness Journey Starts Here</span>
@@ -60,10 +60,10 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Features Section */}
+
                 <section className="max-w-6xl py-16 w-full">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Feature Card 1 */}
+
                         <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
 
@@ -77,7 +77,7 @@ export default function Home() {
                             <p className="text-[#0c4160]/80 text-base leading-relaxed">Log every set and rep with ease. Our intuitive interface makes tracking effortless.</p>
                         </div>
 
-                        {/* Feature Card 2 */}
+
                         <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
 
@@ -91,7 +91,7 @@ export default function Home() {
                             <p className="text-[#0c4160]/80 text-base leading-relaxed">View trends, charts, and personal bests. Data-driven insights for smarter training.</p>
                         </div>
 
-                        {/* Feature Card 3 */}
+
                         <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
 
@@ -107,7 +107,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Stats Section */}
+
                 <section className="max-w-4xl py-12 grid grid-cols-3 gap-8 text-center">
                     <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg">
                         <div className="text-4xl font-bold text-[#0d659d] mb-2">10K+</div>
