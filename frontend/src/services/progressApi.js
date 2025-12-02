@@ -1,40 +1,26 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+// frontend/services/progressApi.js
+import api from "./api";
 
-function authHeaders() {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
+// Get progress records
+export const getProgress = (range) =>
+    api.get(`/progress`, { params: { range } }).then((res) => res.data);
 
-export async function getProgress(range) {
-    const res = await fetch(`${API_BASE}/api/progress?range=${range}`, { headers: authHeaders() });
-    if (!res.ok) throw await res.json();
-    return res.json();
-}
+// Get summary stats
+export const getStats = (range) =>
+    api.get(`/progress/stats`, { params: { range } }).then((res) => res.data);
 
-export async function getStats(range) {
-    const res = await fetch(`${API_BASE}/api/progress/stats?range=${range}`, { headers: authHeaders() });
-    if (!res.ok) throw await res.json();
-    return res.json();
-}
+// Get weekly aggregated counts
+export const getWeekly = (range) =>
+    api.get(`/progress/weekly`, { params: { range } }).then((res) => res.data);
 
-export async function getWeekly(range) {
-    const res = await fetch(`${API_BASE}/api/progress/weekly?range=${range}`, { headers: authHeaders() });
-    if (!res.ok) throw await res.json();
-    return res.json();
-}
+// Get personal records
+export const getPRs = (range) =>
+    api.get(`/progress/pr`, { params: { range } }).then((res) => res.data);
 
-export async function getPRs(range) {
-    const res = await fetch(`${API_BASE}/api/progress/pr?range=${range}`, { headers: authHeaders() });
-    if (!res.ok) throw await res.json();
-    return res.json();
-}
+// Add a new progress record
+export const addProgress = (payload) =>
+    api.post(`/progress`, payload).then((res) => res.data);
 
-export async function addProgress(payload) {
-    const res = await fetch(`${API_BASE}/api/progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-}
+// Delete a progress record
+export const deleteProgress = (id) =>
+    api.delete(`/progress/${id}`).then((res) => res.data);

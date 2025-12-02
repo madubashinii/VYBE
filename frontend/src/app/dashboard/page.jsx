@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
-import axios from "axios";
-
+import { getPlans } from "../services/plansApi";
+import { getProgress, getStats } from "../services/progressApi";
 
 export default function Dashboard() {
 
@@ -26,11 +26,7 @@ export default function Dashboard() {
                 setUser(userInfo);
 
                 // fetch user's weekly progress
-                const progressRes = await axios.get("http://localhost:5000/api/progress", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                const progress = progressRes.data;
+                const progress = await getProgress("week");
                 const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
                 // count workouts per day
@@ -50,22 +46,15 @@ export default function Dashboard() {
 
                 setWeeklyData(chartData);
 
-                const plansRes = await axios.get("http://localhost:5000/api/plans", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
+                // Fetch user's plans
+                const plans = await getPlans();
                 const recent = [];
-                plansRes.data.forEach(plan => {
-                    plan.exercises.forEach(ex => recent.push(ex));
-                });
+                plans.forEach(plan => plan.exercises.forEach(ex => recent.push(ex)));
                 setRecentWorkouts(recent.slice(-3));
 
-                const statsRes = await axios.get(
-                    "http://localhost:5000/api/progress/stats",
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-
-                setStats(statsRes.data.stats || statsRes.data);
+                // Fetch stats
+                const statsData = await getStats("week");
+                setStats(statsData.stats || statsData);
 
             } catch (err) {
                 console.log(err.response?.data || err.message);

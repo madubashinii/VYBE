@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { createPlan } from "../services/plansApi";
 
 export default function CreatePlan() {
     const [planData, setPlanData] = useState({
@@ -40,19 +41,7 @@ export default function CreatePlan() {
                 return;
             }
 
-            const res = await fetch("http://localhost:5000/api/plans", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...planData,
-                    exercises: exercises
-                })
-            });
-
-            const data = await res.json();
+            const data = await createPlan({ ...planData, exercises });
 
             if (res.ok) {
                 alert("Plan created successfully!");
