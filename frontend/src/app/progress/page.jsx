@@ -15,12 +15,18 @@ import {
 } from "recharts";
 import * as api from "../../services/progressApi";
 
-function StatCard({ title, value, change }) {
+function StatCard({ title, value, icon, gradient }) {
     return (
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-lg border border-white/20">
-            <p className="text-[#738fa7] text-xs font-semibold uppercase mb-1">{title}</p>
-            <p className="text-[#0c4160] text-3xl font-bold mb-2">{value ?? "—"}</p>
-            {change && <p className="text-green-600 text-xs font-semibold">{change}</p>}
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center gap-3 mb-3">
+                <div className={`bg-gradient-to-br ${gradient} p-2.5 rounded-xl`}>
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                    </svg>
+                </div>
+            </div>
+            <p className="text-[#738fa7] text-xs font-semibold mb-1">{title}</p>
+            <p className="text-[#0c4160] text-3xl font-bold">{value}</p>
         </div>
     );
 }
@@ -109,7 +115,7 @@ export default function ProgressPage() {
                     </Link>
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
-                            <h1 className="text-[#0c4160] text-4xl font-bold mb-2">Your Progress 📊</h1>
+                            <h1 className="text-[#0c4160] text-4xl font-bold mb-2">Your Progress</h1>
                             <p className="text-[#0c4160]/70 text-lg">Track your fitness journey</p>
                         </div>
 
@@ -145,11 +151,31 @@ export default function ProgressPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <StatCard title="Workouts" value={stats?.totalUpdates ?? "0"} />
-                    <StatCard title="Avg Progress" value={`${stats?.avgProgress ?? 0}%`} />
-                    <StatCard title="Streak" value={stats?.streak ?? 0} />
-                    <StatCard title="Rank" value={`#${stats?.rank ?? "-"}`} />
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <StatCard
+        title="Total Workouts"
+        value={stats?.totalUpdates ?? "0"}
+        icon="M13 10V3L4 14h7v7l9-11h-7z"
+        gradient="from-blue-500 to-cyan-500"
+    />
+    <StatCard
+        title="Avg Progress"
+        value={`${stats?.avgProgress ?? 0}%`}
+        icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+        gradient="from-green-500 to-emerald-500"
+    />
+    <StatCard
+        title="Streak"
+        value={stats?.streak ?? 0}
+        icon="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+        gradient="from-orange-500 to-red-500"
+    />
+    <StatCard
+        title="Rank"
+        value={`#${stats?.rank ?? "-"}`}
+        icon="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+        gradient="from-purple-500 to-pink-500"
+    />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -218,7 +244,7 @@ export default function ProgressPage() {
 
                 {/* personal Records */}
                 <div>
-                    <h2 className="text-[#0c4160] text-2xl font-bold mb-4">Personal Records 🏆</h2>
+                    <h2 className="text-[#0c4160] text-2xl font-bold mb-4">Personal Records</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {prs.length === 0 ? (
                             <p className="text-sm text-[#0c4160]/70">No personal records yet.</p>
