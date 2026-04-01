@@ -2,13 +2,16 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 
 export default function Chart({ title, data }) {
+    const chartData = Array.isArray(data) ? data : [];
+    const xAxisKey = chartData[0]?.day ? "day" : "week";
+
     return (
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-[#c3ceda]/30">
             <h3 className="text-[#0c4160] text-xl font-bold mb-4">{title}</h3>
             <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={data}>
+                <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#c3ceda" opacity={0.3} />
-                    <XAxis dataKey={data[0]?.day ? "day" : "week"} stroke="#738fa7" />
+                    <XAxis dataKey={xAxisKey} stroke="#738fa7" />
                     <YAxis stroke="#738fa7" />
                     <Tooltip
                         contentStyle={{

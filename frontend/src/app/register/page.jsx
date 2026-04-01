@@ -27,8 +27,9 @@ export default function Register() {
                 formData
             );
             localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
             alert("Registration complete!");
-            window.location.href = "/login";
+            window.location.href = "/dashboard";
         } catch (err) {
             console.log(err.response?.data || err.message);
             alert(err.response?.data?.message || "Registration failed");
