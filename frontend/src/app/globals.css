@@ -5,6 +5,19 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
   color: #0c4160;
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(13, 101, 157, 0.14), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(12, 65, 96, 0.12), transparent 28%),
+    linear-gradient(135deg, #c3ceda 0%, #738fa7 50%, #c3ceda 100%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), sans-serif;
 }

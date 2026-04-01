@@ -2,14 +2,18 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL:
-        process.env.NODE_ENV === "development"
-            ? "http://localhost:5000/api"
-            : "https://vybe-neon.vercel.app/api",
+        process.env.NEXT_PUBLIC_API_URL ||
+        (process.env.NODE_ENV === "development" ? "http://localhost:5000/api" : "/api"),
 });
 
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers = config.headers ?? {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
     return config;
 });
 

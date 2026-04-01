@@ -5,6 +5,24 @@ import { hash, compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 const router = Router();
 
+const serializeUser = (user) => {
+    if (!user) return null;
+
+    return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        weight: user.weight ?? 0,
+        height: user.height ?? 0,
+        age: user.age ?? 0,
+        role: user.role ?? "user",
+        preferences: user.preferences,
+        achievements: user.achievements,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+    };
+};
+
 router.post("/register", async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
@@ -23,7 +41,7 @@ router.post("/register", async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-        res.json({ message: "Registered successfully", user, token });
+        res.json({ message: "Registered successfully", user: serializeUser(user), token });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -41,7 +59,7 @@ router.post("/login", async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-        res.json({ message: "Login success", token, user });
+        res.json({ message: "Login success", token, user: serializeUser(user) });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -90,6 +108,10 @@ router.get("/profile", authMiddleware, async (req, res) => {
         const user = await User.findById(req.userId);
         const plan = await Plan.findOne({ userId: req.userId }).lean();
 
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
         res.json({
             profile: {
                 name: user.name ?? "",
@@ -98,9 +120,15 @@ router.get("/profile", authMiddleware, async (req, res) => {
                 weight: user.weight ?? 0,
                 height: user.height ?? "",
             },
-            preferences: user.preferences ?? { units: "imperial", notifications: false, publicProfile: false },
+            preferences: {
+                units: user.preferences?.units ?? "imperial",
+                notifications: user.preferences?.notifications ?? false,
+                publicProfile: user.preferences?.publicProfile ?? false,
+            },
             achievements: user.achievements ?? [],
-            plan: plan ?? { goal: "General Fitness", difficulty: "Beginner" }
+            plan: plan
+                ? { ...plan, _id: plan._id }
+                : { _id: null, name: "", description: "", duration: 4, goal: "General Fitness", difficulty: "Beginner" }
         });
 
     } catch (error) {
@@ -113,6 +141,18 @@ router.get("/profile", authMiddleware, async (req, res) => {
 // Update user profile
 router.put("/profile", authMiddleware, async (req, res) => {
     try {
+        const currentUser = await User.findById(req.userId);
+        if (!currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (req.body.email && req.body.email !== currentUser.email) {
+            const emailExists = await User.findOne({ email: req.body.email, _id: { $ne: req.userId } });
+            if (emailExists) {
+                return res.status(400).json({ message: "Email already exists" });
+            }
+        }
+
         const updated = await User.findByIdAndUpdate(
             req.userId,
             {
@@ -129,9 +169,41 @@ router.put("/profile", authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.json({ message: "Profile updated", updated });
+        res.json({ message: "Profile updated", updated: serializeUser(updated) });
     } catch (err) {
         console.error("PROFILE UPDATE ERROR:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.put("/profile/plan", authMiddleware, async (req, res) => {
+    try {
+        const { name, description, duration, goal, difficulty } = req.body;
+        let plan = await Plan.findOne({ userId: req.userId });
+
+        if (!plan) {
+            plan = await Plan.create({
+                userId: req.userId,
+                name: name ?? "My Plan",
+                description: description ?? "",
+                duration: Number(duration) || 4,
+                goal: goal ?? "General Fitness",
+                difficulty: difficulty ?? "Beginner",
+                exercises: [],
+            });
+        } else {
+            if (name !== undefined) plan.name = name;
+            if (description !== undefined) plan.description = description;
+            if (duration !== undefined) plan.duration = Number(duration) || plan.duration;
+            if (goal !== undefined) plan.goal = goal;
+            if (difficulty !== undefined) plan.difficulty = difficulty;
+
+            await plan.save();
+        }
+
+        res.json({ message: "Plan updated", plan });
+    } catch (err) {
+        console.error("PROFILE PLAN UPDATE ERROR:", err);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -146,7 +218,7 @@ router.put("/preferences", authMiddleware, async (req, res) => {
             { new: true }
         );
 
-        res.json({ message: "Preferences updated", updated });
+        res.json({ message: "Preferences updated", updated: serializeUser(updated) });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

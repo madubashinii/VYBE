@@ -2,13 +2,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+export const isLoggedIn = () => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("token");
+};
+
 // check login status
 export const useIsLoggedIn = () => {
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        setLoggedIn(!!token);
+        setLoggedIn(isLoggedIn());
     }, []);
 
     return loggedIn;
