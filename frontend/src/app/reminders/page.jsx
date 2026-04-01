@@ -4,11 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function Reminders() {
-    const [reminders, setReminders] = useState([
-        { id: 1, title: "Morning Workout", time: "07:00", days: ["Mon", "Wed", "Fri"], enabled: true, type: "workout" },
-        { id: 2, title: "Evening Cardio", time: "18:00", days: ["Tue", "Thu", "Sat"], enabled: true, type: "workout" },
-        { id: 3, title: "Hydration Check", time: "12:00", days: ["Mon", "Tue", "Wed", "Thu", "Fri"], enabled: false, type: "health" }
-    ]);
+    const [reminders, setReminders] = useState([]);
 
     const [notifications, setNotifications] = useState({
         email: true,
@@ -241,11 +237,11 @@ export default function Reminders() {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[#c3ceda] text-sm">Notifications Sent</span>
-                                    <span className="text-2xl font-bold">24</span>
+                                    <span className="text-2xl font-bold">0</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[#c3ceda] text-sm">Completion Rate</span>
-                                    <span className="text-2xl font-bold">87%</span>
+                                    <span className="text-2xl font-bold">0%</span>
                                 </div>
                             </div>
                         </div>

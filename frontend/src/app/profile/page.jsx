@@ -51,9 +51,30 @@ export default function Profile() {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            await api.put("/auth/profile", profileData, {
+            const profileResponse = await api.put("/auth/profile", profileData, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
+
+            await api.put("/auth/profile/plan", {
+                name: plan?.name || "My Plan",
+                description: plan?.description || "",
+                duration: plan?.duration ?? 4,
+                goal: plan?.goal ?? "General Fitness",
+                difficulty: plan?.difficulty ?? "Beginner",
+            }, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (profileResponse.data?.updated) {
+                localStorage.setItem("user", JSON.stringify(profileResponse.data.updated));
+                setProfileData({
+                    name: profileResponse.data.updated.name ?? "",
+                    email: profileResponse.data.updated.email ?? "",
+                    age: profileResponse.data.updated.age ?? 0,
+                    weight: profileResponse.data.updated.weight ?? 0,
+                    height: profileResponse.data.updated.height ?? "",
+                });
+            }
 
             alert("Profile updated successfully!");
         } catch (err) {
@@ -181,7 +202,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Experience</label>
                                 <select
                                     value={plan?.difficulty ?? "Beginner"}
-                                    onChange={(e) => setPlan({ ...plan, difficulty: e.target.value })}
+                                    onChange={(e) => setPlan((current) => ({ ...(current ?? {}), difficulty: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 >
                                     <option value="Beginner">Beginner</option>
@@ -193,7 +214,7 @@ export default function Profile() {
                                 <label className="block text-[#0c4160] text-sm font-semibold mb-2">Fitness Goal</label>
                                 <select
                                     value={plan?.goal ?? "General Fitness"}
-                                    onChange={(e) => setPlan({ ...plan, goal: e.target.value })}
+                                    onChange={(e) => setPlan((current) => ({ ...(current ?? {}), goal: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
                                 >
                                     <option value="Build Muscle">Build Muscle</option>
@@ -294,7 +315,7 @@ export default function Profile() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {achievements.map(achievement => (
                                 <div
-                                    key={achievement.id}
+                                    key={achievement.id ?? achievement.title}
                                     className={`rounded-2xl shadow-lg p-6 border-2 ${achievement.unlocked
                                         ? 'bg-white border-[#0d659d]/50'
                                         : 'bg-white/50 border-[#c3ceda]/30 opacity-60'

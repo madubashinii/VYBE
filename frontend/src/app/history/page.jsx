@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import api from "../../services/api";
+import { deleteProgress, getProgress } from "../../services/progressApi";
 
 
 function WorkoutCard({ workout, onDelete }) {
@@ -13,15 +13,18 @@ function WorkoutCard({ workout, onDelete }) {
         "Flexibility": "from-green-500 to-emerald-500"
     };
 
+    const progress = workout.progressPercent ?? (workout.target ? Math.min(100, Math.round((Number(workout.current) / Number(workout.target)) * 100)) : 0);
+    const calories = workout.caloriesBurned ?? 0;
+
     return (
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20">
-            <div className={`h-2 bg-gradient-to-r ${typeColors[workout.type]}`}></div>
+            <div className={`h-2 bg-gradient-to-r ${typeColors[workout.type] || typeColors.Strength}`}></div>
             <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-[#0c4160] text-xl font-bold">{workout.exercise}</h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${typeColors[workout.type]} text-white`}>
+                            <h3 className="text-[#0c4160] text-xl font-bold">{workout.exerciseName}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${typeColors[workout.type] || typeColors.Strength} text-white`}>
                                 {workout.type}
                             </span>
                         </div>
@@ -36,28 +39,28 @@ function WorkoutCard({ workout, onDelete }) {
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Sets</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.sets}</p>
+                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Current</p>
+                        <p className="text-[#0c4160] text-xl font-bold">{workout.current}</p>
                     </div>
 
                     <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Reps</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.reps}</p>
+                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Target</p>
+                        <p className="text-[#0c4160] text-xl font-bold">{workout.target}</p>
                     </div>
 
                     <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Duration</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.duration}m</p>
+                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Progress</p>
+                        <p className="text-[#0c4160] text-xl font-bold">{progress}%</p>
                     </div>
 
                     <div className="bg-[#c3ceda]/20 rounded-lg p-3">
                         <p className="text-[#738fa7] text-xs font-semibold mb-1">Calories</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.calories}</p>
+                        <p className="text-[#0c4160] text-xl font-bold">{calories}</p>
                     </div>
                 </div>
 
                 <p className="text-[#738fa7] text-sm">
-                    {new Date(workout.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(workout.dateRecorded).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
             </div>
         </div>
@@ -83,52 +86,20 @@ export default function WorkoutHistory() {
         return "Strength";
     };
 
-    const estimateDuration = (exercise, sets, reps) => {
-        const type = determineType(exercise);
-        let minutesPerSet = 2;
-
-        if (type === "Cardio") minutesPerSet = 15;
-        if (type === "Core") minutesPerSet = 1.5;
-        if (type === "Flexibility") minutesPerSet = 2;
-        if (type === "Strength") minutesPerSet = 2;
-
-        return Math.round(sets * minutesPerSet);
-    };
-
-    const estimateCalories = (exercise, duration) => {
-        const type = determineType(exercise);
-        let calPerMin = 5;
-
-        if (type === "Strength") calPerMin = 6;
-        if (type === "Cardio") calPerMin = 10;
-        if (type === "Core") calPerMin = 5;
-        if (type === "Flexibility") calPerMin = 3;
-
-        return Math.round(calPerMin * duration);
-    };
-
     useEffect(() => {
         const fetchWorkouts = async () => {
             try {
-                const token = localStorage.getItem("token");
-                if (!token) return;
-
-                const res = await api.get("/plans", {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-
-                const data = res.data;
-
-                const allExercises = data.flatMap(plan =>
-                    plan.exercises.map(ex => {
-                        const type = determineType(ex.exercise);
-                        const duration = estimateDuration(ex.exercise, ex.sets, ex.reps);
-                        const calories = estimateCalories(ex.exercise, duration);
-                        return { ...ex, type, duration, calories, date: ex.date || new Date().toISOString() };
-                    })
+                const records = await getProgress("year");
+                setWorkouts(
+                    Array.isArray(records)
+                        ? [...records]
+                            .sort((a, b) => new Date(b.dateRecorded) - new Date(a.dateRecorded))
+                            .map((record) => ({
+                                ...record,
+                                type: determineType(record.exerciseName),
+                            }))
+                        : []
                 );
-
-                setWorkouts(allExercises);
             } catch (err) {
                 console.log("Error fetching workouts:", err);
             } finally {
@@ -144,23 +115,7 @@ export default function WorkoutHistory() {
         if (!confirm("Delete this workout?")) return;
 
         try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-
-            // find the plan containing the exercise
-            const res = await api.get("/plans", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const plans = res.data;
-            const planContainingExercise = plans.find(plan => plan.exercises.some(ex => ex._id === id));
-
-            if (!planContainingExercise) return;
-
-            // delete the exercise
-            await api.delete(`/plans/${planContainingExercise._id}/exercises/${id}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-
+            await deleteProgress(id);
             setWorkouts(prev => prev.filter(w => w._id !== id));
         } catch (err) {
             console.error("Error deleting workout:", err);
@@ -169,7 +124,7 @@ export default function WorkoutHistory() {
 
     const filteredWorkouts = workouts.filter(w => {
         const matchesType = filterType === "all" || w.type === filterType;
-        const matchesSearch = w.exercise?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = w.exerciseName?.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesType && matchesSearch;
     });
 

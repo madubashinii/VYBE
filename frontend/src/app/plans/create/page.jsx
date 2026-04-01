@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createPlan } from "../../../services/plansApi";
 
 export default function CreatePlan() {
+    const router = useRouter();
     const [planData, setPlanData] = useState({
         name: "",
         description: "",
@@ -35,24 +37,29 @@ export default function CreatePlan() {
         e.preventDefault();
 
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
+            if (typeof window === "undefined" || !localStorage.getItem("token")) {
                 alert("Please log in first!");
                 return;
             }
 
-            const data = await createPlan({ ...planData, exercises });
+            const payload = {
+                ...planData,
+                duration: Number(planData.duration),
+                exercises: exercises.map((exercise) => ({
+                    exercise: exercise.exercise,
+                    sets: Number(exercise.sets),
+                    reps: Number(exercise.reps),
+                    day: exercise.day,
+                })),
+            };
 
-            if (res.ok) {
-                alert("Plan created successfully!");
-                window.location.href = "/dashboard";
-            } else {
-                alert(data.error || "Failed to create plan");
-            }
+            await createPlan(payload);
+            alert("Plan created successfully!");
+            router.push("/dashboard");
 
         } catch (error) {
             console.log("Error:", error);
-            alert("Something went wrong");
+            alert(error.response?.data?.message || error.response?.data?.error || "Something went wrong");
         }
     };
 

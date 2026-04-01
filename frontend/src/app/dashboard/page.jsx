@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
-import { getPlans } from "../../services/plansApi";
-import { getProgress, getStats } from "../../services/progressApi";
+import { getProgress, getStats, getWeekly } from "../../services/progressApi";
 
 export default function Dashboard() {
 
@@ -21,40 +20,22 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const userInfo = JSON.parse(localStorage.getItem("user"));
-                setUser(userInfo);
+                const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+                setUser(storedUser ? JSON.parse(storedUser) : null);
 
-                // fetch user's weekly progress
-                const progress = await getProgress("week");
-                const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const [weekly, recentProgress, statsData] = await Promise.all([
+                    getWeekly("week"),
+                    getProgress("month"),
+                    getStats("week"),
+                ]);
 
-                // count workouts per day
-                const chartData = weekDays.map(day => ({
-                    day,
-                    workouts: 0
-                }));
-
-                progress.forEach(item => {
-                    const d = new Date(item.dateRecorded);
-                    const dayName = weekDays[d.getDay()];
-
-                    // add workout count to chart
-                    const index = chartData.findIndex(c => c.day === dayName);
-                    chartData[index].workouts += 1;
-                });
-
-                setWeeklyData(chartData);
-
-                // Fetch user's plans
-                const plans = await getPlans();
-                const recent = [];
-                plans.forEach(plan => plan.exercises.forEach(ex => recent.push(ex)));
-                setRecentWorkouts(recent.slice(-3));
-
-                // Fetch stats
-                const statsData = await getStats("week");
-                setStats(statsData.stats || statsData);
+                setWeeklyData(Array.isArray(weekly) ? weekly : []);
+                setRecentWorkouts(
+                    Array.isArray(recentProgress)
+                        ? [...recentProgress].sort((a, b) => new Date(b.dateRecorded) - new Date(a.dateRecorded)).slice(0, 3)
+                        : []
+                );
+                setStats(statsData);
 
             } catch (err) {
                 console.log(err.response?.data || err.message);
@@ -143,14 +124,24 @@ export default function Dashboard() {
                 </div>
 
                 {/* recent workouts */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {recentWorkouts.map((ex, idx) => (
-                        <div key={idx} className="bg-gradient-to-br from-[#0c4160] to-[#0d659d] rounded-2xl shadow-lg p-5 border border-[#738fa7]/20">
-                            <h3 className="text-white text-xl font-bold mb-2">💪 {ex.name}</h3>
-                            <p className="text-[#c3ceda] text-sm">{ex.sets} sets × {ex.reps} reps</p>
-                        </div>
-                    ))}
-                </div>
+                {recentWorkouts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {recentWorkouts.map((ex, idx) => (
+                            <div key={ex._id ?? idx} className="bg-gradient-to-br from-[#0c4160] to-[#0d659d] rounded-2xl shadow-lg p-5 border border-[#738fa7]/20">
+                                <h3 className="text-white text-xl font-bold mb-2">💪 {ex.exerciseName}</h3>
+                                <p className="text-[#c3ceda] text-sm mb-2">{ex.current} / {ex.target}</p>
+                                <p className="text-[#c3ceda] text-xs">
+                                    {ex.progressPercent ?? 0}% complete{ex.caloriesBurned ? ` · ${ex.caloriesBurned} cal` : ""}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-6 border border-white/20 text-[#0c4160]">
+                        <h3 className="text-xl font-bold mb-2">No recent workouts yet</h3>
+                        <p className="text-[#738fa7]">Log a progress entry to see it appear here.</p>
+                    </div>
+                )}
 
             </div>
         </div>
