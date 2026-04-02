@@ -2,138 +2,105 @@
 
 import Link from "next/link";
 
+const features = [
+    {
+        title: "Workout Logging",
+        desc: "Track every session with current and target values, dates, and calories in one place.",
+    },
+    {
+        title: "Custom Plans",
+        desc: "Build structured routines with sets, reps, and exercise split for each training day.",
+    },
+    {
+        title: "Progress Analytics",
+        desc: "Visualize consistency, trends, and personal records from your real saved data.",
+    },
+];
+
 export default function Home() {
     return (
-        <div className="relative min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda] overflow-hidden">
-
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-[#0d659d] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-                <div className="absolute bottom-20 right-10 w-72 h-72 bg-[#0c4160] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-700"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#738fa7] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-1000"></div>
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-[#2a3d6a] bg-[#0f1833]/75 px-6 py-8 shadow-[0_32px_100px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:px-8 lg:px-10">
+            <div className="pointer-events-none absolute inset-0 -z-10">
+                <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-[#ff6a00]/18 blur-3xl" />
+                <div className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-[#ff9e1a]/12 blur-3xl" />
+                <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#1d2d57]/90 blur-3xl" />
             </div>
 
-            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
+            <div className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-7xl flex-col justify-center gap-12 py-6 lg:gap-16">
+                <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
+                    <div className="space-y-8">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[#324878] bg-[#121d3d]/90 px-4 py-2 text-sm font-semibold text-[#d7e3ff] shadow-lg">
+                            <span className="h-2 w-2 rounded-full bg-[#ff6a00]" />
+                            Dark mode performance theme
+                        </div>
 
-                <section className="text-center max-w-3xl py-20">
+                        <div className="space-y-5">
+                            <h1 className="max-w-3xl text-5xl font-bold leading-tight tracking-tight text-[#f4f7ff] sm:text-6xl lg:text-7xl">
+                                Train in your
+                                <span className="block bg-gradient-to-r from-[#ff6a00] via-[#ff9e1a] to-[#ff6a00] bg-clip-text text-transparent">
+                                    own VYBE.
+                                </span>
+                            </h1>
+                            <p className="max-w-2xl text-lg leading-8 text-[#b9c8ea] sm:text-xl">
+                                A full workout workspace with secure auth, progress tracking, custom plans, and clear history powered by your real backend data.
+                            </p>
+                        </div>
 
-                    <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg mb-8 animate-bounce">
-                        <span className="w-2 h-2 bg-gradient-to-r from-[#0d659d] to-[#738fa7] rounded-full animate-pulse"></span>
-                        <span className="text-[#0c4160] text-sm font-semibold">Your Fitness Journey Starts Here</span>
-                    </div>
-
-                    <h1 className="text-[#0c4160] text-6xl md:text-7xl font-bold mb-6 leading-tight">
-                        Welcome to{" "}
-                        <span className="bg-gradient-to-r from-[#0d659d] via-[#0c4160] to-[#0d659d] bg-clip-text text-transparent animate-gradient">
-                            VYBE
-                        </span>
-                    </h1>
-
-                    <p className="text-[#0c4160] text-xl md:text-2xl mb-12 leading-relaxed font-medium">
-                        Track your workouts, build streaks, and reach your fitness goals with our smart workout tracker.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/register"
-                            className="group relative bg-gradient-to-r from-[#0d659d] to-[#0c4160] hover:from-[#0c4160] hover:to-[#0d659d] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105 overflow-hidden"
-                        >
-                            <span className="relative z-10 flex items-center justify-center gap-2">
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <Link
+                                href="/register"
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-6 py-4 text-base font-semibold text-[#120b05] shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+                            >
                                 Get Started
-                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
-                            </span>
-                            <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></span>
-                        </Link>
-
-                        <Link
-                            href="/login"
-                            className="group relative bg-white/90 backdrop-blur-sm border-2 border-[#0d659d] text-[#0d659d] hover:bg-[#0d659d] hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105"
-                        >
-                            <span className="flex items-center justify-center gap-2">
+                            </Link>
+                            <Link
+                                href="/login"
+                                className="inline-flex items-center justify-center rounded-2xl border border-[#324878] bg-[#121d3d]/90 px-6 py-4 text-base font-semibold text-[#e7eefc] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-[#ff6a00]/70"
+                            >
                                 Log In
-                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                                </svg>
-                            </span>
-                        </Link>
+                            </Link>
+                        </div>
                     </div>
-                </section>
 
-
-                <section className="max-w-6xl py-16 w-full">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                        <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-
-                            <div className="bg-gradient-to-br from-[#0d659d] to-[#0c4160] w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
+                    <div className="rounded-[2rem] border border-[#324878] bg-[#111a38]/90 p-6 text-[#ecf2ff] shadow-2xl sm:p-8">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.22em] text-[#95a7cf]">Live Dashboard</p>
+                                <h2 className="mt-2 text-2xl font-bold">All systems connected</h2>
                             </div>
-
-                            <h3 className="text-[#0c4160] text-2xl font-bold mb-3">Track Workouts</h3>
-                            <p className="text-[#0c4160]/80 text-base leading-relaxed">Log every set and rep with ease. Our intuitive interface makes tracking effortless.</p>
+                            <span className="rounded-xl bg-[#1d2d57] px-3 py-1.5 text-xs font-semibold text-[#ff9e1a]">Online</span>
                         </div>
 
-
-                        <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-
-                            <div className="bg-gradient-to-br from-[#0d659d] to-[#0c4160] w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-
-                            <h3 className="text-[#0c4160] text-2xl font-bold mb-3">Analyze Progress</h3>
-                            <p className="text-[#0c4160]/80 text-base leading-relaxed">View trends, charts, and personal bests. Data-driven insights for smarter training.</p>
-                        </div>
-
-
-                        <div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0d659d] to-[#738fa7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-
-                            <div className="bg-gradient-to-br from-[#0d659d] to-[#0c4160] w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-
-                            <h3 className="text-[#0c4160] text-2xl font-bold mb-3">Stay Motivated</h3>
-                            <p className="text-[#0c4160]/80 text-base leading-relaxed">Set reminders, build streaks, and compete on leaderboards. Keep pushing forward!</p>
+                        <div className="mt-6 space-y-3">
+                            {[
+                                "Progress stats and weekly trends",
+                                "Plans + exercises management",
+                                "Workout history with filters",
+                            ].map((item) => (
+                                <div key={item} className="rounded-xl border border-[#2a3d6a] bg-[#0e1630] p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <p className="text-sm text-[#c9d6f5]">{item}</p>
+                                        <span className="h-2.5 w-2.5 rounded-full bg-[#ff6a00]" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
 
-
-                <section className="max-w-4xl py-12 grid grid-cols-3 gap-8 text-center">
-                    <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-                        <div className="text-4xl font-bold text-[#0d659d] mb-2">10K+</div>
-                        <div className="text-[#0c4160] font-medium">Active Users</div>
-                    </div>
-                    <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-                        <div className="text-4xl font-bold text-[#0d659d] mb-2">500K+</div>
-                        <div className="text-[#0c4160] font-medium">Workouts Logged</div>
-                    </div>
-                    <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-                        <div className="text-4xl font-bold text-[#0d659d] mb-2">95%</div>
-                        <div className="text-[#0c4160] font-medium">Satisfaction Rate</div>
-                    </div>
+                <section className="grid gap-5 lg:grid-cols-3">
+                    {features.map((feature) => (
+                        <article key={feature.title} className="rounded-[1.6rem] border border-[#2a3d6a] bg-[#101a37]/90 p-6 shadow-xl transition-transform duration-300 hover:-translate-y-1">
+                            <div className="mb-4 h-1.5 w-14 rounded-full bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a]" />
+                            <h3 className="text-2xl font-bold text-[#f1f6ff]">{feature.title}</h3>
+                            <p className="mt-3 text-base leading-7 text-[#b6c6e8]">{feature.desc}</p>
+                        </article>
+                    ))}
                 </section>
             </div>
-
-            <style jsx>{`
-                @keyframes gradient {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                }
-                .animate-gradient {
-                    background-size: 200% auto;
-                    animation: gradient 3s ease infinite;
-                }
-            `}</style>
         </div>
     );
 }

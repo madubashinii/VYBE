@@ -17,13 +17,13 @@ function WorkoutCard({ workout, onDelete }) {
     const calories = workout.caloriesBurned ?? 0;
 
     return (
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20">
+        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg border border-[#2a3d6a]">
             <div className={`h-2 bg-gradient-to-r ${typeColors[workout.type] || typeColors.Strength}`}></div>
             <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-[#0c4160] text-xl font-bold">{workout.exerciseName}</h3>
+                            <h3 className="text-[#e7eefc] text-xl font-bold">{workout.exerciseName}</h3>
                             <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${typeColors[workout.type] || typeColors.Strength} text-white`}>
                                 {workout.type}
                             </span>
@@ -38,28 +38,28 @@ function WorkoutCard({ workout, onDelete }) {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                    <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Current</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.current}</p>
+                    <div className="bg-[#2a3d6a]/20 rounded-lg p-3">
+                        <p className="text-[#9cb0d7] text-xs font-semibold mb-1">Current</p>
+                        <p className="text-[#e7eefc] text-xl font-bold">{workout.current}</p>
                     </div>
 
-                    <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Target</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{workout.target}</p>
+                    <div className="bg-[#2a3d6a]/20 rounded-lg p-3">
+                        <p className="text-[#9cb0d7] text-xs font-semibold mb-1">Target</p>
+                        <p className="text-[#e7eefc] text-xl font-bold">{workout.target}</p>
                     </div>
 
-                    <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Progress</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{progress}%</p>
+                    <div className="bg-[#2a3d6a]/20 rounded-lg p-3">
+                        <p className="text-[#9cb0d7] text-xs font-semibold mb-1">Progress</p>
+                        <p className="text-[#e7eefc] text-xl font-bold">{progress}%</p>
                     </div>
 
-                    <div className="bg-[#c3ceda]/20 rounded-lg p-3">
-                        <p className="text-[#738fa7] text-xs font-semibold mb-1">Calories</p>
-                        <p className="text-[#0c4160] text-xl font-bold">{calories}</p>
+                    <div className="bg-[#2a3d6a]/20 rounded-lg p-3">
+                        <p className="text-[#9cb0d7] text-xs font-semibold mb-1">Calories</p>
+                        <p className="text-[#e7eefc] text-xl font-bold">{calories}</p>
                     </div>
                 </div>
 
-                <p className="text-[#738fa7] text-sm">
+                <p className="text-[#9cb0d7] text-sm">
                     {new Date(workout.dateRecorded).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
             </div>
@@ -128,26 +128,26 @@ export default function WorkoutHistory() {
         return matchesType && matchesSearch;
     });
 
-    if (loading) return <p className="text-center mt-10 text-[#0c4160] font-bold">Loading workouts...</p>;
+    if (loading) return <p className="text-center mt-10 text-[#e7eefc] font-bold">Loading workouts...</p>;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#c3ceda] via-[#738fa7] to-[#c3ceda]">
+        <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 {/* Header */}
                 <div className="mb-8">
-                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#0c4160] hover:text-[#0d659d] font-semibold mb-4">
+                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
                         ← Back to Dashboard
                     </Link>
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
-                            <h1 className="text-[#0c4160] text-4xl font-bold mb-2">Workout History 📖</h1>
-                            <p className="text-[#0c4160]/70 text-lg">Review your past workouts</p>
+                            <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Workout History 📖</h1>
+                            <p className="text-[#e7eefc]/70 text-lg">Review your past workouts</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-6 border border-white/20">
+                <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-6 border border-[#2a3d6a]">
                     <div className="flex flex-col lg:flex-row gap-4">
 
                         <div className="flex-1">
@@ -156,7 +156,7 @@ export default function WorkoutHistory() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search workouts..."
-                                className="w-full px-4 py-3 bg-white border-2 border-[#c3ceda] rounded-xl text-[#0c4160] focus:border-[#0d659d] outline-none"
+                                className="w-full px-4 py-3 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-xl text-[#e7eefc] focus:border-[#ff6a00] outline-none"
                             />
                         </div>
 
@@ -166,8 +166,8 @@ export default function WorkoutHistory() {
                                     key={type}
                                     onClick={() => setFilterType(type)}
                                     className={`px-4 py-3 rounded-xl font-bold text-sm transition-all ${filterType === type
-                                        ? "bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white"
-                                        : "bg-white border-2 border-[#c3ceda] text-[#0c4160]"
+                                        ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
+                                        : "bg-[#0f1833] border-2 border-[#2a3d6a] text-[#d7e3ff]"
                                         }`}
                                 >
                                     {type === "all" ? "All" : type}
@@ -176,8 +176,8 @@ export default function WorkoutHistory() {
                         </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-[#c3ceda]/30">
-                        <p className="text-[#0c4160] font-semibold">
+                    <div className="mt-4 pt-4 border-t border-[#2a3d6a]/30">
+                        <p className="text-[#e7eefc] font-semibold">
                             {filteredWorkouts.length} workout{filteredWorkouts.length !== 1 ? 's' : ''} found
                         </p>
                     </div>
@@ -191,16 +191,16 @@ export default function WorkoutHistory() {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-12 text-center border border-white/20">
+                    <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-12 text-center border border-[#2a3d6a]">
                         <div className="text-6xl mb-4">🔍</div>
-                        <h3 className="text-[#0c4160] text-2xl font-bold mb-2">No workouts found</h3>
-                        <p className="text-[#738fa7] mb-6">Try adjusting your filters</p>
+                        <h3 className="text-[#e7eefc] text-2xl font-bold mb-2">No workouts found</h3>
+                        <p className="text-[#9cb0d7] mb-6">Try adjusting your filters</p>
                         <button
                             onClick={() => {
                                 setFilterType("all");
                                 setSearchTerm("");
                             }}
-                            className="bg-gradient-to-r from-[#0d659d] to-[#0c4160] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                            className="bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
                         >
                             Clear Filters
                         </button>
