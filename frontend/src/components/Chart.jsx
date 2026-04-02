@@ -6,27 +6,27 @@ export default function Chart({ title, data }) {
     const xAxisKey = chartData[0]?.day ? "day" : "week";
 
     return (
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-[#c3ceda]/30">
-            <h3 className="text-[#0c4160] text-xl font-bold mb-4">{title}</h3>
+        <div className="bg-[#101a37]/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-[#2a3d6a]/30">
+            <h3 className="text-[#e7eefc] text-xl font-bold mb-4">{title}</h3>
             <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#c3ceda" opacity={0.3} />
-                    <XAxis dataKey={xAxisKey} stroke="#738fa7" />
-                    <YAxis stroke="#738fa7" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2a3d6a" opacity={0.3} />
+                    <XAxis dataKey={xAxisKey} stroke="#9cb0d7" />
+                    <YAxis stroke="#9cb0d7" />
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "#0c4160",
+                            backgroundColor: "#0f1833",
                             border: "none",
                             borderRadius: "8px",
-                            color: "#fff"
+                            color: "#e7eefc"
                         }}
                     />
                     <Line
                         type="monotone"
                         dataKey="workouts"
-                        stroke="#0d659d"
+                        stroke="#ff6a00"
                         strokeWidth={3}
-                        dot={{ fill: "#0d659d", r: 5 }}
+                        dot={{ fill: "#ff6a00", r: 5 }}
                         activeDot={{ r: 7 }}
                     />
                 </LineChart>
