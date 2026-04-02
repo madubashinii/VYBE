@@ -5,12 +5,12 @@
 @tailwind utilities;
 
 body {
-  color: #0c4160;
+  color: #e7eefc;
   font-family: var(--font-body), sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(13, 101, 157, 0.14), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(12, 65, 96, 0.12), transparent 28%),
-    linear-gradient(135deg, #c3ceda 0%, #738fa7 50%, #c3ceda 100%);
+    radial-gradient(circle at top left, rgba(255, 106, 0, 0.14), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(255, 158, 26, 0.1), transparent 30%),
+    linear-gradient(135deg, #070b1a 0%, #0b132b 50%, #111b38 100%);
 }
 
 h1,
