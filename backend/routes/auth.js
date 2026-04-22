@@ -17,6 +17,7 @@ const serializeUser = (user) => {
         age: user.age ?? 0,
         role: user.role ?? "user",
         preferences: user.preferences,
+        reminders: user.reminders ?? [],
         achievements: user.achievements,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -125,6 +126,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
                 notifications: user.preferences?.notifications ?? false,
                 publicProfile: user.preferences?.publicProfile ?? false,
             },
+            reminders: user.reminders ?? [],
             achievements: user.achievements ?? [],
             plan: plan
                 ? { ...plan, _id: plan._id }
@@ -219,6 +221,22 @@ router.put("/preferences", authMiddleware, async (req, res) => {
         );
 
         res.json({ message: "Preferences updated", updated: serializeUser(updated) });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.put("/reminders", authMiddleware, async (req, res) => {
+    try {
+        const reminders = Array.isArray(req.body.reminders) ? req.body.reminders : [];
+
+        const updated = await User.findByIdAndUpdate(
+            req.userId,
+            { reminders },
+            { new: true }
+        );
+
+        res.json({ message: "Reminders updated", reminders: updated.reminders ?? [] });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import api from "../../services/api";
 
 export default function Reminders() {
     const [reminders, setReminders] = useState([]);
@@ -23,14 +24,59 @@ export default function Reminders() {
         type: "workout"
     });
 
+    useEffect(() => {
+        const loadReminders = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const res = await api.get("/auth/profile", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                setReminders(Array.isArray(res.data?.reminders) ? res.data.reminders : []);
+
+                if (res.data?.preferences) {
+                    setNotifications((current) => ({
+                        ...current,
+                        email: Boolean(res.data.preferences.notifications),
+                    }));
+                }
+            } catch (err) {
+                console.error("Failed to load reminders:", err);
+            }
+        };
+
+        loadReminders();
+    }, []);
+
+    const saveReminders = async (nextReminders) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            await api.put(
+                "/auth/reminders",
+                { reminders: nextReminders },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+        } catch (err) {
+            console.error("Failed to save reminders:", err);
+        }
+    };
+
     const toggleReminder = (id) => {
-        setReminders(reminders.map(r =>
+        const nextReminders = reminders.map(r =>
             r.id === id ? { ...r, enabled: !r.enabled } : r
-        ));
+        );
+        setReminders(nextReminders);
+        void saveReminders(nextReminders);
     };
 
     const deleteReminder = (id) => {
-        setReminders(reminders.filter(r => r.id !== id));
+        const nextReminders = reminders.filter(r => r.id !== id);
+        setReminders(nextReminders);
+        void saveReminders(nextReminders);
     };
 
     const toggleNotification = (key) => {
@@ -48,7 +94,9 @@ export default function Reminders() {
 
     const addReminder = () => {
         if (newReminder.title && newReminder.days.length > 0) {
-            setReminders([...reminders, { ...newReminder, id: Date.now(), enabled: true }]);
+            const nextReminders = [...reminders, { ...newReminder, id: Date.now(), enabled: true }];
+            setReminders(nextReminders);
+            void saveReminders(nextReminders);
             setNewReminder({ title: "", time: "09:00", days: [], type: "workout" });
             setShowAddModal(false);
         }

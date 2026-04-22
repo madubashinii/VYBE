@@ -13,6 +13,16 @@ const userSchema = new Schema({
         notifications: { type: Boolean, default: true },
         publicProfile: { type: Boolean, default: true },
     },
+    reminders: [
+        {
+            id: Number,
+            title: String,
+            time: String,
+            days: [String],
+            type: String,
+            enabled: { type: Boolean, default: true },
+        },
+    ],
     achievements: [
         {
             id: Number,
