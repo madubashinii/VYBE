@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "../lib/db.js";
 
 import authRoutes from "../routes/auth.js";
+import adminRoutes from "../routes/admin.js";
 import planRoutes from "../routes/plans.js";
 import progressRoutes from "../routes/progress.js";
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/progress", progressRoutes);
 
