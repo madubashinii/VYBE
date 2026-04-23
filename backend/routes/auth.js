@@ -1,6 +1,7 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import Plan from "../models/Plan.js";
+import crypto from "crypto";
 import { hash, compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 const router = Router();
@@ -61,6 +62,58 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
         res.json({ message: "Login success", token, user: serializeUser(user) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post("/forgot-password", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) return res.status(400).json({ message: "Email is required" });
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "No account found for that email" });
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+        user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
+        await user.save();
+
+        res.json({
+            message: "Reset token generated",
+            resetToken,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post("/reset-password", async (req, res) => {
+    try {
+        const { email, token, password } = req.body;
+
+        if (!email || !token || !password) {
+            return res.status(400).json({ message: "Email, token, and password are required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user || !user.resetPasswordToken || !user.resetPasswordExpires) {
+            return res.status(400).json({ message: "Invalid or expired reset token" });
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+        if (hashedToken !== user.resetPasswordToken || user.resetPasswordExpires < new Date()) {
+            return res.status(400).json({ message: "Invalid or expired reset token" });
+        }
+
+        user.password = await hash(password, 10);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: "Password updated successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -237,6 +290,20 @@ router.put("/reminders", authMiddleware, async (req, res) => {
         );
 
         res.json({ message: "Reminders updated", reminders: updated.reminders ?? [] });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.get("/me", authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({ user: serializeUser(user) });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

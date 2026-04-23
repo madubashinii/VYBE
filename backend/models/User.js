@@ -8,6 +8,8 @@ const userSchema = new Schema({
     height: Number,
     age: Number,
     role: { type: String, default: "user" },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     preferences: {
         units: { type: String, default: "imperial" },
         notifications: { type: Boolean, default: true },
