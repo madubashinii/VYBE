@@ -7,6 +7,7 @@ import { useIsLoggedIn, useLogout } from "../services/auth";
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
     const profileMenuRef = useRef(null);
     const loggedIn = useIsLoggedIn();
     const logout = useLogout();
@@ -22,6 +23,17 @@ export default function Navbar() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        try {
+            const storedUser = localStorage.getItem("user");
+            setUserRole(storedUser ? JSON.parse(storedUser)?.role ?? null : null);
+        } catch {
+            setUserRole(null);
+        }
+    }, [loggedIn]);
 
     return (
         <nav className="relative z-50 border-b border-[#24345d] bg-[#0c142d]/80 text-[#e7eefc] shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
@@ -45,6 +57,7 @@ export default function Navbar() {
                 <div className="hidden lg:flex items-center gap-2">
                     <NavItem href="/" label="Home" />
                     {loggedIn && <NavItem href="/dashboard" label="Dashboard" />}
+                    {loggedIn && userRole === "admin" && <NavItem href="/admin" label="Admin" />}
 
                     {loggedIn && (
                         <div className="relative" ref={profileMenuRef}>
@@ -114,6 +127,9 @@ export default function Navbar() {
                     <MobileLink href="/" label="Home" onClick={() => setMobileMenuOpen(false)} />
                     {loggedIn && (
                         <MobileLink href="/dashboard" label="Dashboard" onClick={() => setMobileMenuOpen(false)} />
+                    )}
+                    {loggedIn && userRole === "admin" && (
+                        <MobileLink href="/admin" label="Admin" onClick={() => setMobileMenuOpen(false)} />
                     )}
                     <div className="my-2 border-t border-[#2e4574]"></div>
 
