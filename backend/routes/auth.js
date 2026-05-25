@@ -4,6 +4,7 @@ import Plan from "../models/Plan.js";
 import crypto from "crypto";
 import { hash, compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { auth } from "../middleware/auth.js";
 const router = Router();
 
 const serializeUser = (user) => {
@@ -29,17 +30,20 @@ router.post("/register", async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "Name, email and password are required" });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) return res.status(400).json({ message: "Invalid email" });
+        if (String(password).length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+
         const exists = await User.findOne({ email });
         if (exists) return res.status(400).json({ message: "Email already exists" });
 
         const hashed = await hash(password, 10);
 
-        const user = await User.create({
-            name,
-            email,
-            password: hashed,
-            role,
-        });
+        const user = await User.create({ name, email, password: hashed, role });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -52,12 +56,13 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
 
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: "Invalid email" });
+        if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
         const match = await compare(password, user.password);
-        if (!match) return res.status(400).json({ message: "Wrong password" });
+        if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -120,13 +125,10 @@ router.post("/reset-password", async (req, res) => {
 });
 
 //Update personal info
-router.put("/me", async (req, res) => {
+router.put("/me", auth, async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
         const { weight, height, age } = req.body;
 
@@ -136,35 +138,32 @@ router.put("/me", async (req, res) => {
             { new: true }
         );
 
-        res.json({ message: "Personal info updated", user });
+        res.json({
+            message: "Personal info updated", user: user ? {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                weight: user.weight,
+                height: user.height,
+                age: user.age,
+                preferences: user.preferences
+            } : null
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Middleware to get user from token
-const authMiddleware = (req, res, next) => {
-    try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.id;
-        next();
-    } catch (err) {
-        res.status(401).json({ message: "Invalid token" });
-    }
-};
-
 // Get user profile
-router.get("/profile", authMiddleware, async (req, res) => {
+router.get("/profile", auth, async (req, res) => {
     try {
-        const user = await User.findById(req.userId);
-        const plan = await Plan.findOne({ userId: req.userId }).lean();
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const user = await User.findById(userId);
+        const plan = await Plan.findOne({ userId }).lean();
+
+        if (!user) return res.status(404).json({ message: "User not found" });
 
         res.json({
             profile: {
@@ -185,7 +184,6 @@ router.get("/profile", authMiddleware, async (req, res) => {
                 ? { ...plan, _id: plan._id }
                 : { _id: null, name: "", description: "", duration: 4, goal: "General Fitness", difficulty: "Beginner" }
         });
-
     } catch (error) {
         console.error("PROFILE ROUTE ERROR:", error);
         res.status(500).json({ message: "Server error loading profile" });
@@ -194,9 +192,12 @@ router.get("/profile", authMiddleware, async (req, res) => {
 
 
 // Update user profile
-router.put("/profile", authMiddleware, async (req, res) => {
+router.put("/profile", auth, async (req, res) => {
     try {
-        const currentUser = await User.findById(req.userId);
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const currentUser = await User.findById(userId);
         if (!currentUser) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -209,7 +210,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
         }
 
         const updated = await User.findByIdAndUpdate(
-            req.userId,
+            userId,
             {
                 name: req.body.name,
                 email: req.body.email,
@@ -231,10 +232,13 @@ router.put("/profile", authMiddleware, async (req, res) => {
     }
 });
 
-router.put("/profile/plan", authMiddleware, async (req, res) => {
+router.put("/profile/plan", auth, async (req, res) => {
     try {
         const { name, description, duration, goal, difficulty } = req.body;
-        let plan = await Plan.findOne({ userId: req.userId });
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        let plan = await Plan.findOne({ userId });
 
         if (!plan) {
             plan = await Plan.create({
@@ -265,10 +269,13 @@ router.put("/profile/plan", authMiddleware, async (req, res) => {
 
 
 // Update user preferences
-router.put("/preferences", authMiddleware, async (req, res) => {
+router.put("/preferences", auth, async (req, res) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
         const updated = await User.findByIdAndUpdate(
-            req.userId,
+            userId,
             { preferences: req.body },
             { new: true }
         );
@@ -279,12 +286,15 @@ router.put("/preferences", authMiddleware, async (req, res) => {
     }
 });
 
-router.put("/reminders", authMiddleware, async (req, res) => {
+router.put("/reminders", auth, async (req, res) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
         const reminders = Array.isArray(req.body.reminders) ? req.body.reminders : [];
 
         const updated = await User.findByIdAndUpdate(
-            req.userId,
+            userId,
             { reminders },
             { new: true }
         );
@@ -295,13 +305,13 @@ router.put("/reminders", authMiddleware, async (req, res) => {
     }
 });
 
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/me", auth, async (req, res) => {
     try {
-        const user = await User.findById(req.userId);
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
 
         res.json({ user: serializeUser(user) });
     } catch (err) {
