@@ -7,8 +7,22 @@ const router = Router();
 // create plan
 router.post("/", auth, async (req, res) => {
     try {
+        const { name, duration, exercises } = req.body;
+        if (!name) return res.status(400).json({ message: "Plan name is required" });
+
+        const dur = Number(duration) || 4;
+        const normalizedExercises = Array.isArray(exercises) ? exercises.map((ex) => ({
+            exercise: ex.exercise || "",
+            sets: Number(ex.sets) || 0,
+            reps: Number(ex.reps) || 0,
+            day: ex.day || ""
+        })) : [];
+
         const plan = await Plan.create({
             ...req.body,
+            name,
+            duration: dur,
+            exercises: normalizedExercises,
             userId: req.user.id
         });
 
@@ -23,6 +37,17 @@ router.get("/", auth, async (req, res) => {
     try {
         const plans = await Plan.find({ userId: req.user.id });
         res.json(plans);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// get single plan
+router.get("/:id", auth, async (req, res) => {
+    try {
+        const plan = await Plan.findOne({ _id: req.params.id, userId: req.user.id });
+        if (!plan) return res.status(404).json({ message: "Plan not found" });
+        res.json(plan);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

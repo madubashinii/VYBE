@@ -56,25 +56,31 @@ router.get("/", auth, async (req, res) => {
 // get summary stats: totalUpdates, avgProgress, streak, rank
 router.get("/stats", auth, async (req, res) => {
     try {
-        const range = req.query.range || "week";
+        let { exerciseName, current, target, caloriesBurned } = req.body;
 
-        let startDate = new Date();
-        if (range === "week") startDate.setDate(startDate.getDate() - 7);
-        if (range === "month") startDate.setMonth(startDate.getMonth() - 1);
-        if (range === "year") startDate.setFullYear(startDate.getFullYear() - 1);
+        if (!exerciseName) return res.status(400).json({ message: "exerciseName is required" });
 
-        const progress = await Progress.find({
+        const currNum = Number(current);
+        const targNum = Number(target);
+        if (Number.isNaN(currNum) || Number.isNaN(targNum) || targNum <= 0) {
+            return res.status(400).json({ message: "Invalid current or target values" });
+        }
+
+        let percent = Math.floor((currNum / targNum) * 100);
+        if (!Number.isFinite(percent) || percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+
+        const newProgress = new Progress({
             userId: req.user.id,
-            dateRecorded: { $gte: startDate }
-        }).sort({ dateRecorded: 1 });
+            exerciseName,
+            current: currNum,
+            target: targNum,
+            progressPercent: percent,
+            caloriesBurned: Number(caloriesBurned) || 0
+        });
 
-        const totalUpdates = progress.length;
-
-        const avgProgress =
-            totalUpdates > 0
-                ? Math.round(progress.reduce((sum, p) => sum + (p.progressPercent || 0), 0) / totalUpdates)
-                : 0;
-
+        await newProgress.save();
+        res.json(newProgress);
         let streak = 0;
         if (progress.length > 0) {
 
