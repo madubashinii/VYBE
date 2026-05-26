@@ -12,6 +12,11 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!email || !password) {
+            alert("Please enter both email and password");
+            return;
+        }
+
         try {
             const response = await api.post("/auth/login", { email, password });
             console.log("Login success:", response.data);

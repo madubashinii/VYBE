@@ -21,6 +21,11 @@ export default function Register() {
     };
 
     const handleSubmit = async () => {
+        if (!formData.name || !formData.email || !formData.password) {
+            alert("Please complete name, email and password");
+            return;
+        }
+
         try {
             const response = await api.post(
                 "/auth/register",
