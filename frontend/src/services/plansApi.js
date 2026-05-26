@@ -4,6 +4,8 @@ import api from "./api";
 export const getPlans = (range) =>
     api.get(`/plans`, { params: { range } }).then((res) => res.data);
 
+export const getPlan = (planId) => api.get(`/plans/${planId}`).then((res) => res.data);
+
 // Add a new plans record
 export const createPlan = (payload) =>
     api.post(`/plans`, payload).then((res) => res.data);
