@@ -1,5 +1,6 @@
 "use client";
 
+import ProtectedRoute from "../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -77,6 +78,7 @@ export default function ProgressPage() {
     const [prs, setPrs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [timeRange, setTimeRange] = useState("week");
+    const [newEntry, setNewEntry] = useState({ exerciseName: "", current: "", target: "", caloriesBurned: "" });
 
     useEffect(() => {
         let mounted = true;
@@ -106,154 +108,250 @@ export default function ProgressPage() {
         };
     }, [timeRange]);
 
+    const reload = async () => {
+        setLoading(true);
+        try {
+            const [prog, st, wk, pr] = await Promise.all([
+                api.getProgress(timeRange),
+                api.getStats(timeRange),
+                api.getWeekly(timeRange),
+                api.getPRs(timeRange),
+            ]);
+            setProgressData(Array.isArray(prog) ? prog.reverse() : []);
+            setStats(st);
+            setWeekly(Array.isArray(wk) ? wk : []);
+            setPrs(Array.isArray(pr) ? pr : []);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        if (!newEntry.exerciseName || !newEntry.current || !newEntry.target) {
+            alert("Please provide exercise name, current and target values.");
+            return;
+        }
+
+        try {
+            await api.addProgress({
+                exerciseName: newEntry.exerciseName,
+                current: Number(newEntry.current),
+                target: Number(newEntry.target),
+                caloriesBurned: Number(newEntry.caloriesBurned) || 0,
+            });
+            setNewEntry({ exerciseName: "", current: "", target: "", caloriesBurned: "" });
+            await reload();
+        } catch (err) {
+            console.error("Add progress failed:", err);
+            alert(err.response?.data?.message || "Failed to add progress");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm("Delete this progress entry?")) return;
+        try {
+            await api.deleteProgress(id);
+            await reload();
+        } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Failed to delete");
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
-                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
-                        ← Back to Dashboard
-                    </Link>
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                        <div>
-                            <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Your Progress</h1>
-                            <p className="text-[#e7eefc]/70 text-lg">Track your fitness journey</p>
-                        </div>
+        <ProtectedRoute>
+            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="mb-8">
+                        <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
+                            ← Back to Dashboard
+                        </Link>
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                            <div>
+                                <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Your Progress</h1>
+                                <p className="text-[#e7eefc]/70 text-lg">Track your fitness journey</p>
+                            </div>
 
-                        <div className="flex gap-2 bg-[#101a37]/90 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border border-[#2a3d6a]">
-                            <button
-                                onClick={() => setTimeRange("week")}
-                                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "week"
-                                    ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
-                                    : "text-[#e7eefc] hover:bg-[#1b2a52]"
-                                    }`}
-                            >
-                                Week
-                            </button>
-                            <button
-                                onClick={() => setTimeRange("month")}
-                                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "month"
-                                    ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
-                                    : "text-[#e7eefc] hover:bg-[#1b2a52]"
-                                    }`}
-                            >
-                                Month
-                            </button>
-                            <button
-                                onClick={() => setTimeRange("year")}
-                                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "year"
-                                    ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
-                                    : "text-[#e7eefc] hover:bg-[#1b2a52]"
-                                    }`}
-                            >
-                                Year
-                            </button>
+                            <div className="flex gap-2 bg-[#101a37]/90 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border border-[#2a3d6a]">
+                                <button
+                                    onClick={() => setTimeRange("week")}
+                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "week"
+                                        ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
+                                        : "text-[#e7eefc] hover:bg-[#1b2a52]"
+                                        }`}
+                                >
+                                    Week
+                                </button>
+                                <button
+                                    onClick={() => setTimeRange("month")}
+                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "month"
+                                        ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
+                                        : "text-[#e7eefc] hover:bg-[#1b2a52]"
+                                        }`}
+                                >
+                                    Month
+                                </button>
+                                <button
+                                    onClick={() => setTimeRange("year")}
+                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${timeRange === "year"
+                                        ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white"
+                                        : "text-[#e7eefc] hover:bg-[#1b2a52]"
+                                        }`}
+                                >
+                                    Year
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <StatCard
-                        title="Total Workouts"
-                        value={stats?.totalUpdates ?? "0"}
-                        icon="M13 10V3L4 14h7v7l9-11h-7z"
-                        gradient="from-blue-500 to-cyan-500"
-                    />
-                    <StatCard
-                        title="Avg Progress"
-                        value={`${stats?.avgProgress ?? 0}%`}
-                        icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                        gradient="from-green-500 to-emerald-500"
-                    />
-                    <StatCard
-                        title="Streak"
-                        value={stats?.streak ?? 0}
-                        icon="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
-                        gradient="from-orange-500 to-red-500"
-                    />
-                    <StatCard
-                        title="Rank"
-                        value={`#${stats?.rank ?? "-"}`}
-                        icon="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                        gradient="from-purple-500 to-pink-500"
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-[#2a3d6a]">
-                        <h3 className="text-[#e7eefc] text-xl font-bold mb-4">Weekly Activity</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <LineChart data={weekly}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2a3d6a" opacity={0.3} />
-                                <XAxis dataKey="day" stroke="#9cb0d7" />
-                                <YAxis stroke="#9cb0d7" />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "#0f1833",
-                                        border: "none",
-                                        borderRadius: "12px",
-                                        color: "#e7eefc",
-                                    }}
+                    {/* Add Progress Form */}
+                    <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-[#2a3d6a] mb-6">
+                        <h3 className="text-[#e7eefc] text-lg font-bold mb-3">Add Progress</h3>
+                        <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <input
+                                placeholder="Exercise name"
+                                value={newEntry.exerciseName}
+                                onChange={(e) => setNewEntry({ ...newEntry, exerciseName: e.target.value })}
+                                className="px-3 py-2 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-lg text-[#e7eefc]"
+                            />
+                            <input
+                                placeholder="Current"
+                                value={newEntry.current}
+                                onChange={(e) => setNewEntry({ ...newEntry, current: e.target.value })}
+                                className="px-3 py-2 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-lg text-[#e7eefc]"
+                            />
+                            <input
+                                placeholder="Target"
+                                value={newEntry.target}
+                                onChange={(e) => setNewEntry({ ...newEntry, target: e.target.value })}
+                                className="px-3 py-2 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-lg text-[#e7eefc]"
+                            />
+                            <div className="flex gap-2">
+                                <input
+                                    placeholder="Calories"
+                                    value={newEntry.caloriesBurned}
+                                    onChange={(e) => setNewEntry({ ...newEntry, caloriesBurned: e.target.value })}
+                                    className="px-3 py-2 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-lg text-[#e7eefc] flex-1"
                                 />
-                                <Line type="monotone" dataKey="count" stroke="#ff6a00" strokeWidth={3} dot={{ r: 4 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                                <button className="bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-4 py-2 rounded-xl font-bold text-black">Add</button>
+                            </div>
+                        </form>
                     </div>
 
-                    <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-[#2a3d6a]">
-                        <h3 className="text-[#e7eefc] text-xl font-bold mb-4">Workouts (by day)</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <BarChart data={weekly}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2a3d6a" opacity={0.3} />
-                                <XAxis dataKey="day" stroke="#9cb0d7" />
-                                <YAxis stroke="#9cb0d7" />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "#0f1833",
-                                        border: "none",
-                                        borderRadius: "12px",
-                                        color: "#e7eefc",
-                                    }}
-                                />
-                                <Bar dataKey="count" radius={[6, 6, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <StatCard
+                            title="Total Workouts"
+                            value={stats?.totalUpdates ?? "0"}
+                            icon="M13 10V3L4 14h7v7l9-11h-7z"
+                            gradient="from-blue-500 to-cyan-500"
+                        />
+                        <StatCard
+                            title="Avg Progress"
+                            value={`${stats?.avgProgress ?? 0}%`}
+                            icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                            gradient="from-green-500 to-emerald-500"
+                        />
+                        <StatCard
+                            title="Streak"
+                            value={stats?.streak ?? 0}
+                            icon="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                            gradient="from-orange-500 to-red-500"
+                        />
+                        <StatCard
+                            title="Rank"
+                            value={`#${stats?.rank ?? "-"}`}
+                            icon="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                            gradient="from-purple-500 to-pink-500"
+                        />
                     </div>
-                </div>
 
-                {/* exercise progress list */}
-                <div className="mb-8">
-                    <h2 className="text-[#e7eefc] text-2xl font-bold mb-4">Exercise Progress</h2>
-                    {loading ? (
-                        <p>Loading…</p>
-                    ) : progressData.length === 0 ? (
-                        <p className="text-sm text-[#e7eefc]/70">No progress recorded yet.</p>
-                    ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {progressData.map((item, i) => (
-                                <ProgressBar
-                                    key={item._id ?? i}
-                                    exercise={item.exerciseName}
-                                    current={item.current}
-                                    target={item.target}
-                                    progress={item.progressPercent}
-                                />
-                            ))}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-[#2a3d6a]">
+                            <h3 className="text-[#e7eefc] text-xl font-bold mb-4">Weekly Activity</h3>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <LineChart data={weekly}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a3d6a" opacity={0.3} />
+                                    <XAxis dataKey="day" stroke="#9cb0d7" />
+                                    <YAxis stroke="#9cb0d7" />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: "#0f1833",
+                                            border: "none",
+                                            borderRadius: "12px",
+                                            color: "#e7eefc",
+                                        }}
+                                    />
+                                    <Line type="monotone" dataKey="count" stroke="#ff6a00" strokeWidth={3} dot={{ r: 4 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
                         </div>
-                    )}
-                </div>
 
-                {/* personal Records */}
-                <div>
-                    <h2 className="text-[#e7eefc] text-2xl font-bold mb-4">Personal Records</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {prs.length === 0 ? (
-                            <p className="text-sm text-[#e7eefc]/70">No personal records yet.</p>
+                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-[#2a3d6a]">
+                            <h3 className="text-[#e7eefc] text-xl font-bold mb-4">Workouts (by day)</h3>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={weekly}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a3d6a" opacity={0.3} />
+                                    <XAxis dataKey="day" stroke="#9cb0d7" />
+                                    <YAxis stroke="#9cb0d7" />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: "#0f1833",
+                                            border: "none",
+                                            borderRadius: "12px",
+                                            color: "#e7eefc",
+                                        }}
+                                    />
+                                    <Bar dataKey="count" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* exercise progress list */}
+                    <div className="mb-8">
+                        <h2 className="text-[#e7eefc] text-2xl font-bold mb-4">Exercise Progress</h2>
+                        {loading ? (
+                            <p>Loading…</p>
+                        ) : progressData.length === 0 ? (
+                            <p className="text-sm text-[#e7eefc]/70">No progress recorded yet.</p>
                         ) : (
-                            prs.map((rec, i) => <PRCard key={rec.exercise ?? i} record={rec} />)
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {progressData.map((item, i) => (
+                                    <div key={item._id ?? i} className="relative">
+                                        <ProgressBar
+                                            exercise={item.exerciseName}
+                                            current={item.current}
+                                            target={item.target}
+                                            progress={item.progressPercent}
+                                        />
+                                        <button
+                                            onClick={() => handleDelete(item._id)}
+                                            className="absolute top-3 right-3 text-sm text-red-400 bg-[#0b1228]/60 px-2 py-1 rounded-md border border-red-600"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         )}
+                    </div>
+
+                    {/* personal Records */}
+                    <div>
+                        <h2 className="text-[#e7eefc] text-2xl font-bold mb-4">Personal Records</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {prs.length === 0 ? (
+                                <p className="text-sm text-[#e7eefc]/70">No personal records yet.</p>
+                            ) : (
+                                prs.map((rec, i) => <PRCard key={rec.exercise ?? i} record={rec} />)
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </ProtectedRoute>
     );
 }
