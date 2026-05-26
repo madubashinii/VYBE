@@ -69,8 +69,26 @@ router.get("/overview", async (req, res) => {
 
 router.get("/users", async (req, res) => {
     try {
-        const users = await User.find().sort({ createdAt: -1 });
-        res.json({ users: users.map(serializeUser) });
+        const page = Math.max(1, Number(req.query.page) || 1);
+        const limit = Math.min(100, Number(req.query.limit) || 20);
+        const skip = (page - 1) * limit;
+
+        const search = req.query.search ? String(req.query.search).trim() : null;
+        const role = req.query.role ? String(req.query.role).trim() : null;
+
+        const filter = {};
+        if (search) {
+            const re = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+            filter.$or = [{ name: re }, { email: re }];
+        }
+        if (role) filter.role = role;
+
+        const [users, total] = await Promise.all([
+            User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            User.countDocuments(filter),
+        ]);
+
+        res.json({ users: users.map(serializeUser), total, page, limit });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

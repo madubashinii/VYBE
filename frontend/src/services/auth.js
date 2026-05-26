@@ -30,3 +30,24 @@ export const useLogout = () => {
 
     return logout;
 };
+
+// Get parsed user from localStorage
+export const getUser = () => {
+    if (typeof window === "undefined") return null;
+    try {
+        const raw = localStorage.getItem("user");
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+};
+
+export const useUser = () => {
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        setUser(getUser());
+    }, []);
+
+    return user;
+};
