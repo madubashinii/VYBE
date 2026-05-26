@@ -119,6 +119,71 @@ router.put("/users/:id/role", async (req, res) => {
     }
 });
 
+// Admin: list plans with pagination and optional search/user filter
+router.get("/plans", async (req, res) => {
+    try {
+        const page = Math.max(1, Number(req.query.page) || 1);
+        const limit = Math.min(100, Number(req.query.limit) || 20);
+        const skip = (page - 1) * limit;
+
+        const search = req.query.search ? String(req.query.search).trim() : null;
+        const userId = req.query.userId ? String(req.query.userId).trim() : null;
+
+        const filter = {};
+        if (search) {
+            const re = new RegExp(search.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&"), "i");
+            filter.$or = [{ name: re }, { description: re }, { goal: re }];
+        }
+        if (userId) filter.userId = userId;
+
+        const [plans, total] = await Promise.all([
+            Plan.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit).lean(),
+            Plan.countDocuments(filter),
+        ]);
+
+        res.json({ plans: plans.map(p => ({ id: p._id, name: p.name, userId: p.userId, goal: p.goal, difficulty: p.difficulty, updatedAt: p.updatedAt })), total, page, limit });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Admin: get plan by id
+router.get("/plans/:id", async (req, res) => {
+    try {
+        const plan = await Plan.findById(req.params.id).lean();
+        if (!plan) return res.status(404).json({ message: "Plan not found" });
+        res.json({ plan });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Admin: update plan
+router.put("/plans/:id", async (req, res) => {
+    try {
+        const allowed = ["name", "description", "duration", "difficulty", "goal", "exercises"];
+        const update = {};
+        for (const k of allowed) if (req.body[k] !== undefined) update[k] = req.body[k];
+
+        const updated = await Plan.findByIdAndUpdate(req.params.id, update, { new: true });
+        if (!updated) return res.status(404).json({ message: "Plan not found" });
+        res.json({ message: "Plan updated", plan: updated });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Admin: delete plan
+router.delete("/plans/:id", async (req, res) => {
+    try {
+        const deleted = await Plan.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ message: "Plan not found" });
+        res.json({ message: "Plan deleted" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Get single user
 router.get("/users/:id", async (req, res) => {
     try {

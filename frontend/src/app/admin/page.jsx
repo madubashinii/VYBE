@@ -2,6 +2,7 @@
 
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import api from "../../services/api";
 
 export default function AdminPanel() {
@@ -208,20 +209,26 @@ export default function AdminPanel() {
                             {users.map((user) => (
                                 <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-[#2a3d6a] bg-[#0b1228] p-4 md:flex-row md:items-center md:justify-between">
                                     <div>
-                                        <p className="text-[#e7eefc] font-semibold">{user.name}</p>
-                                        <p className="text-[#9cb0d7] text-sm">{user.email}</p>
+                                        <Link href={`/admin/users/${user.id}`} className="block hover:underline">
+                                            <p className="text-[#e7eefc] font-semibold">{user.name}</p>
+                                            <p className="text-[#9cb0d7] text-sm">{user.email}</p>
+                                        </Link>
                                     </div>
-                                    <button
-                                        onClick={() => handleRoleChange(user.id, user.role)}
-                                        disabled={savingRoleId === user.id}
-                                        className="rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
-                                    >
-                                        {savingRoleId === user.id
-                                            ? "Updating..."
-                                            : user.role === "admin"
-                                                ? "Demote to user"
-                                                : "Promote to admin"}
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => handleRoleChange(user.id, user.role)}
+                                            disabled={savingRoleId === user.id}
+                                            className="rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
+                                        >
+                                            {savingRoleId === user.id
+                                                ? "Updating..."
+                                                : user.role === "admin"
+                                                    ? "Demote to user"
+                                                    : "Promote to admin"}
+                                        </button>
+
+                                        <Link href={`/admin/users/${user.id}`} className="rounded-2xl px-3 py-2 bg-[#1b2a52] text-sm text-[#9cb0d7]">View</Link>
+                                    </div>
                                 </div>
                             ))}
                         </div>
