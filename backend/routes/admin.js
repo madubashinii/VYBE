@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import Plan from "../models/Plan.js";
 import Progress from "../models/Progress.js";
 import { auth } from "../middleware/auth.js";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ const serializeUser = (user) => ({
     name: user.name,
     email: user.email,
     role: user.role ?? "user",
+    active: user.active !== undefined ? user.active : true,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
 });
@@ -112,6 +114,46 @@ router.put("/users/:id/role", async (req, res) => {
         }
 
         res.json({ message: "Role updated", user: serializeUser(updated) });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Get single user
+router.get("/users/:id", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.json({ user: serializeUser(user) });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Set active flag (soft-deactivate/reactivate)
+router.put("/users/:id/active", async (req, res) => {
+    try {
+        const { active } = req.body;
+        if (typeof active !== "boolean") return res.status(400).json({ message: "Invalid active value" });
+
+        const updated = await User.findByIdAndUpdate(req.params.id, { active }, { new: true });
+        if (!updated) return res.status(404).json({ message: "User not found" });
+
+        res.json({ message: active ? "User reactivated" : "User deactivated", user: serializeUser(updated) });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Impersonate user: returns a short-lived token for the target user
+router.post("/users/:id/impersonate", async (req, res) => {
+    try {
+        const target = await User.findById(req.params.id);
+        if (!target) return res.status(404).json({ message: "User not found" });
+
+        const token = jwt.sign({ id: target._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        res.json({ message: "Impersonation token created", token, user: serializeUser(target) });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

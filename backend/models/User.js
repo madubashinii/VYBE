@@ -8,6 +8,7 @@ const userSchema = new Schema({
     height: Number,
     age: Number,
     role: { type: String, default: "user" },
+    active: { type: Boolean, default: true },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     preferences: {
