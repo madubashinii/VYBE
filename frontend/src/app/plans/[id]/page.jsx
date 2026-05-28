@@ -2,13 +2,14 @@
 
 import ProtectedRoute from "../../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getPlan, updatePlan, deletePlan } from "../../../services/plansApi";
 
-export default function EditPlan({ params }) {
+export default function EditPlan() {
     const router = useRouter();
-    const { id } = params;
+    const params = useParams();
+    const id = params?.id;
     const [plan, setPlan] = useState(null);
     const [loading, setLoading] = useState(true);
 

@@ -2,6 +2,7 @@
 
 import ProtectedRoute from "../../components/ProtectedRoute";
 import Link from "next/link";
+import api from "../../services/api";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
 import { getProgress, getStats, getWeekly } from "../../services/progressApi";
@@ -9,6 +10,8 @@ import { getProgress, getStats, getWeekly } from "../../services/progressApi";
 export default function Dashboard() {
 
     const [user, setUser] = useState(null);
+    const [plan, setPlan] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [weeklyData, setWeeklyData] = useState([]);
     const [recentWorkouts, setRecentWorkouts] = useState([]);
     const [stats, setStats] = useState({
@@ -21,14 +24,19 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-                setUser(storedUser ? JSON.parse(storedUser) : null);
-
-                const [weekly, recentProgress, statsData] = await Promise.all([
+                const [profileRes, weekly, recentProgress, statsData] = await Promise.all([
+                    api.get("/auth/profile"),
                     getWeekly("week"),
                     getProgress("month"),
                     getStats("week"),
                 ]);
+
+                const profile = profileRes.data?.profile ?? null;
+                const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+                const fallbackUser = storedUser ? JSON.parse(storedUser) : null;
+
+                setUser(profile ? { ...fallbackUser, ...profile } : fallbackUser);
+                setPlan(profileRes.data?.plan ?? null);
 
                 setWeeklyData(Array.isArray(weekly) ? weekly : []);
                 setRecentWorkouts(
@@ -40,12 +48,16 @@ export default function Dashboard() {
 
             } catch (err) {
                 console.log(err.response?.data || err.message);
+            } finally {
+                setLoading(false);
             }
         };
 
 
         fetchData();
     }, []);
+
+    const hasPlan = Boolean(plan?._id);
 
     const statCards = [
         { label: "Workouts", value: stats.totalUpdates, note: "this week" },
@@ -75,6 +87,24 @@ export default function Dashboard() {
         },
     ];
 
+    const firstRunActions = [
+        {
+            title: "Create your plan",
+            description: "Set your goal, difficulty, and exercises to unlock the full dashboard.",
+            href: "/plans/create",
+        },
+        {
+            title: "Complete profile",
+            description: "Update your height, weight, and experience so recommendations stay relevant.",
+            href: "/profile",
+        },
+        {
+            title: "Start logging",
+            description: "Add your first progress entry once your plan is ready.",
+            href: "/progress",
+        },
+    ];
+
 
     return (
         <ProtectedRoute>
@@ -83,6 +113,11 @@ export default function Dashboard() {
                 <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#3fb7ff]/10 blur-3xl" />
 
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+                    {loading ? (
+                        <div className="mb-8 rounded-3xl border border-[#2a3d6a] bg-[#0d1734]/85 p-8 text-[#c8d6f4] shadow-2xl">
+                            Loading your dashboard...
+                        </div>
+                    ) : null}
 
                     <div className="mb-8 border border-[#2a3d6a] rounded-3xl bg-[#0d1734]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
                         <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Dashboard</p>
@@ -93,6 +128,73 @@ export default function Dashboard() {
                             Keep your momentum high with focused plans, measured progress, and consistent effort.
                         </p>
                     </div>
+
+                    {!hasPlan ? (
+                        <div className="mb-8 rounded-3xl border border-[#ff9e1a]/30 bg-gradient-to-r from-[#ff6a00]/15 to-[#101a37]/90 p-6 sm:p-8 shadow-2xl">
+                            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                                <div className="max-w-2xl">
+                                    <p className="text-xs uppercase tracking-[0.2em] text-[#ffb067] mb-3">First-time setup</p>
+                                    <h2 className="text-[#f2f7ff] text-2xl sm:text-3xl font-bold mb-3">Build your first plan to unlock the full experience</h2>
+                                    <p className="text-[#d7e3ff] text-sm sm:text-base">
+                                        Your dashboard will become much more useful once you add a training plan. Start with a plan, then track workouts and watch your progress chart fill up.
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <Link href="/plans/create" className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-5 py-3 text-sm font-semibold text-[#130b05] shadow-lg transition-transform hover:scale-[1.01]">
+                                        Create plan
+                                    </Link>
+                                    <Link href="/profile" className="inline-flex items-center justify-center rounded-2xl border border-[#2a3d6a] bg-[#0b1228] px-5 py-3 text-sm font-semibold text-[#e7eefc] transition-colors hover:border-[#ff9e1a] hover:text-[#ffb067]">
+                                        Finish profile
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {firstRunActions.map((action, index) => (
+                                    <Link key={action.title} href={action.href} className="rounded-2xl border border-[#2a3d6a] bg-[#0b1228]/70 p-5 hover:border-[#4a639a] transition-colors">
+                                        <p className="text-[#ffb067] text-xs uppercase tracking-[0.18em] mb-2">Step {index + 1}</p>
+                                        <h3 className="text-[#e7eefc] text-lg font-bold mb-2">{action.title}</h3>
+                                        <p className="text-[#9cb0d7] text-sm">{action.description}</p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mb-8 rounded-3xl border border-[#2a3d6a] bg-[#0d1734]/85 p-6 sm:p-8 shadow-2xl">
+                            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Active plan</p>
+                                    <h2 className="text-[#f2f7ff] text-2xl sm:text-3xl font-bold mb-2">{plan?.name || "Your training plan"}</h2>
+                                    <p className="text-[#c8d6f4] text-sm sm:text-base max-w-2xl">
+                                        {plan?.description || "Your plan is ready. Keep logging workouts and update progress to stay on track."}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <Link href={`/plans/${plan?._id}`} className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-5 py-3 text-sm font-semibold text-[#130b05] shadow-lg transition-transform hover:scale-[1.01]">
+                                        View plan
+                                    </Link>
+                                    <Link href="/progress" className="inline-flex items-center justify-center rounded-2xl border border-[#2a3d6a] bg-[#0b1228] px-5 py-3 text-sm font-semibold text-[#e7eefc] transition-colors hover:border-[#ff9e1a] hover:text-[#ffb067]">
+                                        Add progress
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="rounded-2xl border border-[#2a3d6a] bg-[#0b1228]/70 p-4">
+                                    <p className="text-[#9cb0d7] text-xs uppercase tracking-[0.18em] mb-2">Goal</p>
+                                    <p className="text-[#e7eefc] font-semibold">{plan?.goal || "General Fitness"}</p>
+                                </div>
+                                <div className="rounded-2xl border border-[#2a3d6a] bg-[#0b1228]/70 p-4">
+                                    <p className="text-[#9cb0d7] text-xs uppercase tracking-[0.18em] mb-2">Difficulty</p>
+                                    <p className="text-[#e7eefc] font-semibold">{plan?.difficulty || "Beginner"}</p>
+                                </div>
+                                <div className="rounded-2xl border border-[#2a3d6a] bg-[#0b1228]/70 p-4">
+                                    <p className="text-[#9cb0d7] text-xs uppercase tracking-[0.18em] mb-2">Duration</p>
+                                    <p className="text-[#e7eefc] font-semibold">{plan?.duration ?? 4} weeks</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         {statCards.map((card) => (
@@ -105,7 +207,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                        {quickActions.map((action) => (
+                        {(hasPlan ? quickActions : quickActions.slice(0, 2)).map((action) => (
                             <Link
                                 key={action.title}
                                 href={action.href}
@@ -169,8 +271,12 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 border border-[#2a3d6a] text-[#e7eefc]">
-                            <h3 className="text-xl font-bold mb-2">No recent workouts yet</h3>
-                            <p className="text-[#9cb0d7]">Log a progress entry to see it appear here.</p>
+                            <h3 className="text-xl font-bold mb-2">{hasPlan ? "No recent workouts yet" : "Nothing to show yet"}</h3>
+                            <p className="text-[#9cb0d7]">
+                                {hasPlan
+                                    ? "Log a progress entry to see it appear here."
+                                    : "Create your first plan and add a workout to populate this section."}
+                            </p>
                         </div>
                     )}
 

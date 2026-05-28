@@ -22,6 +22,7 @@ export default function Profile() {
 
     const [achievements, setAchievements] = useState([]);
     const [plan, setPlan] = useState(null);
+    const hasPlan = Boolean(plan?._id);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -56,7 +57,7 @@ export default function Profile() {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
-            await api.put("/auth/profile/plan", {
+            const planResponse = await api.put("/auth/profile/plan", {
                 name: plan?.name || "My Plan",
                 description: plan?.description || "",
                 duration: plan?.duration ?? 4,
@@ -75,6 +76,10 @@ export default function Profile() {
                     weight: profileResponse.data.updated.weight ?? 0,
                     height: profileResponse.data.updated.height ?? "",
                 });
+            }
+
+            if (planResponse.data?.plan) {
+                setPlan(planResponse.data.plan);
             }
 
             alert("Profile updated successfully!");
@@ -119,6 +124,35 @@ export default function Profile() {
                             </div>
                         </div>
                     </div>
+
+                    {!hasPlan && (
+                        <div className="mb-6 rounded-2xl border border-[#ff9e1a]/30 bg-[#ff6a00]/10 p-5 shadow-lg">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-[#ffb067] mb-2">Finish setup</p>
+                                    <h2 className="text-[#f2f7ff] text-xl font-bold mb-1">Create your first training plan</h2>
+                                    <p className="text-[#d7e3ff] text-sm max-w-2xl">
+                                        Your profile is ready. Add a plan so the dashboard, history, and progress views have a real starting point.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Link
+                                        href="/plans/create"
+                                        className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-5 py-3 text-sm font-semibold text-[#130b05] shadow-lg transition-transform hover:scale-[1.01]"
+                                    >
+                                        Create plan
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("profile")}
+                                        className="inline-flex items-center justify-center rounded-2xl border border-[#2a3d6a] bg-[#0b1228] px-5 py-3 text-sm font-semibold text-[#e7eefc] transition-colors hover:border-[#ff9e1a] hover:text-[#ffb067]"
+                                    >
+                                        Review profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Tabs */}
                     <div className="bg-[#101a37]/90 backdrop-blur-sm rounded-2xl p-1.5 shadow-lg mb-6 inline-flex gap-2 border border-[#2a3d6a]">
@@ -183,7 +217,7 @@ export default function Profile() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[#e7eefc] text-sm font-semibold mb-2">Weight (lbs)</label>
+                                    <label className="block text-[#e7eefc] text-sm font-semibold mb-2">Weight (kg)</label>
                                     <input
                                         type="number"
                                         value={profileData?.weight}
@@ -192,7 +226,7 @@ export default function Profile() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[#e7eefc] text-sm font-semibold mb-2">Height</label>
+                                    <label className="block text-[#e7eefc] text-sm font-semibold mb-2">Height (cm)</label>
                                     <input
                                         type="text"
                                         value={profileData?.height}
@@ -231,7 +265,7 @@ export default function Profile() {
                                 onClick={handleSaveProfile}
                                 className="bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
                             >
-                                Save Changes
+                                Save & continue setup
                             </button>
                         </div>
                     )}

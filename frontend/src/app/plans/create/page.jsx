@@ -1,24 +1,81 @@
 "use client";
 
 import ProtectedRoute from "../../../components/ProtectedRoute";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import api from "../../../services/api";
 import { createPlan } from "../../../services/plansApi";
 
 export default function CreatePlan() {
     const router = useRouter();
-    const [planData, setPlanData] = useState({
+    const [loading, setLoading] = useState(false);
+    const [prefilling, setPrefilling] = useState(true);
+    const [profileSummary, setProfileSummary] = useState({
         name: "",
+        goal: "General Fitness",
+        difficulty: "Beginner",
+    });
+    const [planData, setPlanData] = useState({
+        name: "My Plan",
         description: "",
         duration: "4",
-        difficulty: "",
-        goal: ""
+        difficulty: "Beginner",
+        goal: "General Fitness"
     });
 
     const [exercises, setExercises] = useState([
         { id: 1, exercise: "", sets: "", reps: "", day: "" }
     ]);
+
+    useEffect(() => {
+        const loadProfileDefaults = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return;
+
+                const res = await api.get("/auth/profile", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const profile = res.data?.profile;
+                const plan = res.data?.plan;
+
+                setProfileSummary({
+                    name: profile?.name || "",
+                    goal: plan?.goal || "General Fitness",
+                    difficulty: plan?.difficulty || "Beginner",
+                });
+
+                setPlanData((current) => ({
+                    ...current,
+                    name: plan?.name || current.name || "My Plan",
+                    description: plan?.description || current.description || "",
+                    duration: String(plan?.duration || current.duration || 4),
+                    goal: plan?.goal || current.goal || "General Fitness",
+                    difficulty: plan?.difficulty || current.difficulty || "Beginner",
+                }));
+
+                if (Array.isArray(plan?.exercises) && plan.exercises.length > 0) {
+                    setExercises(
+                        plan.exercises.map((exercise) => ({
+                            id: exercise._id || `${exercise.exercise}-${exercise.day}-${Math.random()}`,
+                            exercise: exercise.exercise || "",
+                            sets: exercise.sets ?? "",
+                            reps: exercise.reps ?? "",
+                            day: exercise.day || "",
+                        }))
+                    );
+                }
+            } catch (err) {
+                console.error("Failed to load plan defaults:", err);
+            } finally {
+                setPrefilling(false);
+            }
+        };
+
+        loadProfileDefaults();
+    }, []);
 
     const addExercise = () => {
         setExercises([...exercises, { id: Date.now(), exercise: "", sets: "", reps: "", day: "" }]);
@@ -37,7 +94,41 @@ export default function CreatePlan() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const normalizedExercises = exercises.map((exercise) => ({
+            exercise: exercise.exercise.trim(),
+            sets: Number(exercise.sets),
+            reps: Number(exercise.reps),
+            day: exercise.day.trim(),
+        }));
+
+        if (!planData.name.trim()) {
+            alert("Please add a plan name.");
+            return;
+        }
+
+        if (!planData.goal) {
+            alert("Please choose a fitness goal.");
+            return;
+        }
+
+        if (!planData.difficulty) {
+            alert("Please choose a difficulty level.");
+            return;
+        }
+
+        if (normalizedExercises.length === 0) {
+            alert("Please add at least one exercise.");
+            return;
+        }
+
+        const hasIncompleteExercise = normalizedExercises.some((exercise) => !exercise.exercise || !exercise.sets || !exercise.reps || !exercise.day);
+        if (hasIncompleteExercise) {
+            alert("Complete every exercise row before creating the plan.");
+            return;
+        }
+
         try {
+            setLoading(true);
             if (typeof window === "undefined" || !localStorage.getItem("token")) {
                 alert("Please log in first!");
                 return;
@@ -46,21 +137,18 @@ export default function CreatePlan() {
             const payload = {
                 ...planData,
                 duration: Number(planData.duration),
-                exercises: exercises.map((exercise) => ({
-                    exercise: exercise.exercise,
-                    sets: Number(exercise.sets),
-                    reps: Number(exercise.reps),
-                    day: exercise.day,
-                })),
+                exercises: normalizedExercises,
             };
 
             await createPlan(payload);
-            alert("Plan created successfully!");
+            alert("Plan created successfully! Your dashboard is ready.");
             router.push("/dashboard");
 
         } catch (error) {
             console.log("Error:", error);
             alert(error.response?.data?.message || error.response?.data?.error || "Something went wrong");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -80,6 +168,32 @@ export default function CreatePlan() {
                         <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Plan Builder</p>
                         <h1 className="text-[#e7eefc] text-3xl sm:text-4xl font-bold mb-2">Create Custom Plan</h1>
                         <p className="text-[#c8d6f4] text-base sm:text-lg max-w-2xl">Design a structured routine with clear goals, balanced sessions, and progressive overload.</p>
+                    </div>
+
+                    <div className="mb-6 rounded-2xl border border-[#2a3d6a] bg-[#101a37]/90 p-5 shadow-xl backdrop-blur-xl">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-2">Onboarding step</p>
+                                <h2 className="text-[#e7eefc] text-xl font-bold mb-1">
+                                    {prefilling ? "Loading your profile defaults..." : "Build your first plan from your profile"}
+                                </h2>
+                                <p className="text-[#c8d6f4] text-sm max-w-2xl">
+                                    {profileSummary.name
+                                        ? `${profileSummary.name}, we prefilled your plan goal and difficulty so you can finish setup faster.`
+                                        : "We prefilled your plan goal and difficulty so you can finish setup faster."}
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div className="rounded-xl border border-[#2a3d6a] bg-[#0b1228] px-4 py-3">
+                                    <p className="text-[#9cb0d7] text-xs uppercase tracking-[0.15em] mb-1">Goal</p>
+                                    <p className="text-[#e7eefc] font-semibold">{planData.goal || "General Fitness"}</p>
+                                </div>
+                                <div className="rounded-xl border border-[#2a3d6a] bg-[#0b1228] px-4 py-3">
+                                    <p className="text-[#9cb0d7] text-xs uppercase tracking-[0.15em] mb-1">Difficulty</p>
+                                    <p className="text-[#e7eefc] font-semibold">{planData.difficulty || "Beginner"}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-[#2a3d6a] mb-6">
@@ -121,10 +235,9 @@ export default function CreatePlan() {
                                             onChange={(e) => setPlanData({ ...planData, difficulty: e.target.value })}
                                             className="w-full px-4 py-3 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-xl text-[#e7eefc] focus:border-[#ff6a00] outline-none"
                                         >
-                                            <option value="">Select</option>
-                                            <option value="beginner">Beginner</option>
-                                            <option value="intermediate">Intermediate</option>
-                                            <option value="advanced">Advanced</option>
+                                            <option value="Beginner">Beginner</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Advanced">Advanced</option>
                                         </select>
                                     </div>
                                 </div>
@@ -136,11 +249,11 @@ export default function CreatePlan() {
                                         onChange={(e) => setPlanData({ ...planData, goal: e.target.value })}
                                         className="w-full px-4 py-3 bg-[#0b1228] border-2 border-[#2a3d6a] rounded-xl text-[#e7eefc] focus:border-[#ff6a00] outline-none"
                                     >
-                                        <option value="">Select your goal</option>
-                                        <option value="strength">Build Strength</option>
-                                        <option value="muscle">Gain Muscle</option>
-                                        <option value="weight-loss">Lose Weight</option>
-                                        <option value="endurance">Improve Endurance</option>
+                                        <option value="General Fitness">General Fitness</option>
+                                        <option value="Build Muscle">Build Muscle</option>
+                                        <option value="Lose Weight">Lose Weight</option>
+                                        <option value="Increase Strength">Increase Strength</option>
+                                        <option value="Improve Endurance">Improve Endurance</option>
                                     </select>
                                 </div>
 
@@ -261,9 +374,10 @@ export default function CreatePlan() {
 
                         <button
                             onClick={handleSubmit}
+                            disabled={loading || prefilling}
                             className="w-full bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all"
                         >
-                            ✓ Create Plan
+                            {loading ? "Creating plan..." : prefilling ? "Preparing plan..." : "✓ Create Plan"}
                         </button>
                     </div>
 
