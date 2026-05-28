@@ -28,7 +28,7 @@ const serializeUser = (user) => {
 
 router.post("/register", async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Name, email and password are required" });
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
 
         const hashed = await hash(password, 10);
 
-        const user = await User.create({ name, email, password: hashed, role });
+        const user = await User.create({ name, email, password: hashed, role: "user" });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -88,9 +88,13 @@ router.post("/forgot-password", async (req, res) => {
         user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save();
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         res.json({
-            message: "Reset token generated",
-            resetToken,
+            message: isProduction
+                ? "If an account exists for that email, password reset instructions have been sent."
+                : "Reset token generated",
+            ...(isProduction ? {} : { resetToken }),
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

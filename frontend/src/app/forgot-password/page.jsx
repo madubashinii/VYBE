@@ -21,10 +21,17 @@ export default function ForgotPassword() {
 
         try {
             const res = await api.post("/auth/forgot-password", { email });
-            setIssuedToken(res.data?.resetToken ?? "");
-            setToken(res.data?.resetToken ?? "");
-            setStep("reset");
-            setMessage("Reset token generated. Use it below to set a new password.");
+            const nextToken = res.data?.resetToken ?? "";
+            setIssuedToken(nextToken);
+            setToken(nextToken);
+
+            if (nextToken) {
+                setStep("reset");
+                setMessage("Reset token generated. Use it below to set a new password.");
+            } else {
+                setStep("request");
+                setMessage(res.data?.message || "If the account exists, reset instructions have been sent.");
+            }
         } catch (err) {
             setMessage(err.response?.data?.message || "Unable to generate reset token.");
         } finally {
