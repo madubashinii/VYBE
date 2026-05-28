@@ -87,7 +87,7 @@ export default function AdminPlans() {
                                             <p className="text-[#e7eefc] font-semibold">{p.name}</p>
                                             <p className="text-[#9cb0d7] text-sm">{p.goal} · {p.difficulty}</p>
                                         </Link>
-                                        <p className="text-[#9cb0d7] text-xs mt-1">Owner: {String(p.userId)}</p>
+                                        <p className="text-[#9cb0d7] text-xs mt-1">Owner: {p.user?.name || p.user?.email || String(p.userId)}</p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Link href={`/admin/plans/${p.id}`} className="px-3 py-2 rounded-lg bg-[#1b2a52] text-[#9cb0d7]">View</Link>

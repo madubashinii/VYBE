@@ -16,6 +16,7 @@ export default function AdminPanel() {
     const [limit, setLimit] = useState(10);
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState("");
+    const [selectedUsers, setSelectedUsers] = useState([]);
     const [savingRoleId, setSavingRoleId] = useState(null);
 
     useEffect(() => {
@@ -39,6 +40,7 @@ export default function AdminPanel() {
                 setRecentPlans(Array.isArray(overviewRes.data?.recentPlans) ? overviewRes.data.recentPlans : []);
                 setUsers(Array.isArray(usersRes.data?.users) ? usersRes.data.users : []);
                 setTotal(usersRes.data?.total || 0);
+                setSelectedUsers([]);
             } catch (err) {
                 if (err.response?.status === 403) {
                     setError("Admin access required.");
@@ -68,6 +70,7 @@ export default function AdminPanel() {
         setRecentPlans(Array.isArray(overviewRes.data?.recentPlans) ? overviewRes.data.recentPlans : []);
         setUsers(Array.isArray(usersRes.data?.users) ? usersRes.data.users : []);
         setTotal(usersRes.data?.total || 0);
+        setSelectedUsers([]);
     };
 
     const handleRoleChange = async (userId, currentRole) => {
@@ -99,6 +102,36 @@ export default function AdminPanel() {
         await refreshUsers();
     };
 
+    const toggleSelectedUser = (userId) => {
+        setSelectedUsers((current) =>
+            current.includes(userId) ? current.filter((id) => id !== userId) : [...current, userId]
+        );
+    };
+
+    const runBulkAction = async (action) => {
+        if (!selectedUsers.length) return;
+        const confirmMap = {
+            promote: "Promote selected users to admin?",
+            demote: "Demote selected admins to user?",
+            activate: "Reactivate selected users?",
+            deactivate: "Deactivate selected users?",
+        };
+        if (!confirm(confirmMap[action] || "Run bulk action?")) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            await api.post(
+                "/admin/users/bulk",
+                { action, ids: selectedUsers },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            await refreshUsers();
+        } catch (err) {
+            setError(err.response?.data?.message || "Bulk action failed.");
+        }
+    };
+
     const goPage = async (next) => {
         const newPage = next ? page + 1 : Math.max(1, page - 1);
         setPage(newPage);
@@ -109,6 +142,7 @@ export default function AdminPanel() {
             const usersRes = await api.get("/admin/users", { headers, params: { page: newPage, limit, search } });
             setUsers(Array.isArray(usersRes.data?.users) ? usersRes.data.users : []);
             setTotal(usersRes.data?.total || 0);
+            setSelectedUsers([]);
         } catch (err) {
             console.error(err);
         }
@@ -145,6 +179,12 @@ export default function AdminPanel() {
                                 <p className="text-[#ff9e1a] text-sm font-semibold uppercase tracking-[0.2em]">Admin panel</p>
                                 <h1 className="text-[#e7eefc] text-3xl font-bold mt-2">Site management</h1>
                                 <p className="text-[#9cb0d7] mt-2">Manage users and review the current platform state.</p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Link href="/admin/dashboard" className="rounded-2xl bg-[#1b2a52] px-4 py-2 text-sm text-[#d7e3ff]">Dashboard</Link>
+                                <Link href="/admin/plans" className="rounded-2xl bg-[#1b2a52] px-4 py-2 text-sm text-[#d7e3ff]">Plans</Link>
+                                <Link href="/admin/progress" className="rounded-2xl bg-[#1b2a52] px-4 py-2 text-sm text-[#d7e3ff]">Progress</Link>
+                                <Link href="/admin/logs" className="rounded-2xl bg-[#1b2a52] px-4 py-2 text-sm text-[#d7e3ff]">Logs</Link>
                             </div>
                         </div>
 
@@ -189,6 +229,13 @@ export default function AdminPanel() {
 
                     <div className="bg-[#101a37]/90 backdrop-blur-sm rounded-3xl shadow-xl border border-[#2a3d6a]/30 p-6">
                         <h2 className="text-[#e7eefc] text-xl font-bold mb-4">User access</h2>
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <button onClick={() => runBulkAction("promote")} disabled={!selectedUsers.length} className="rounded-xl bg-[#ff6a00] px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Bulk promote</button>
+                            <button onClick={() => runBulkAction("demote")} disabled={!selectedUsers.length} className="rounded-xl bg-[#1b2a52] px-3 py-2 text-sm font-semibold text-[#d7e3ff] disabled:opacity-50">Bulk demote</button>
+                            <button onClick={() => runBulkAction("activate")} disabled={!selectedUsers.length} className="rounded-xl bg-[#1b2a52] px-3 py-2 text-sm font-semibold text-[#d7e3ff] disabled:opacity-50">Bulk activate</button>
+                            <button onClick={() => runBulkAction("deactivate")} disabled={!selectedUsers.length} className="rounded-xl bg-[#1b2a52] px-3 py-2 text-sm font-semibold text-[#d7e3ff] disabled:opacity-50">Bulk deactivate</button>
+                            <span className="text-sm text-[#9cb0d7]">Selected: {selectedUsers.length}</span>
+                        </div>
                         <div className="mb-4 flex items-center gap-3">
                             <form onSubmit={handleSearch} className="flex-1">
                                 <input
@@ -208,11 +255,19 @@ export default function AdminPanel() {
                         <div className="space-y-3">
                             {users.map((user) => (
                                 <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-[#2a3d6a] bg-[#0b1228] p-4 md:flex-row md:items-center md:justify-between">
-                                    <div>
-                                        <Link href={`/admin/users/${user.id}`} className="block hover:underline">
-                                            <p className="text-[#e7eefc] font-semibold">{user.name}</p>
-                                            <p className="text-[#9cb0d7] text-sm">{user.email}</p>
-                                        </Link>
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedUsers.includes(user.id)}
+                                            onChange={() => toggleSelectedUser(user.id)}
+                                            className="h-4 w-4 accent-[#ff6a00]"
+                                        />
+                                        <div>
+                                            <Link href={`/admin/users/${user.id}`} className="block hover:underline">
+                                                <p className="text-[#e7eefc] font-semibold">{user.name}</p>
+                                                <p className="text-[#9cb0d7] text-sm">{user.email}</p>
+                                            </Link>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <button

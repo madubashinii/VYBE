@@ -3,7 +3,7 @@
 import ProtectedRoute from "../../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import api from "../../../services/api";
+import api from "../../../../services/api";
 
 export default function UserDetail() {
     const { id } = useParams();
