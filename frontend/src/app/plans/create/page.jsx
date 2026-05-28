@@ -67,15 +67,19 @@ export default function CreatePlan() {
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38] relative overflow-hidden">
+                <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#ff6a00]/15 blur-3xl" />
+                <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#3fb7ff]/10 blur-3xl" />
 
-                    <div className="mb-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+
+                    <div className="mb-8 border border-[#2a3d6a] rounded-3xl bg-[#0d1734]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
                         <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
                             ←  Back to Dashboard
                         </Link>
-                        <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Create Custom Plan 📝</h1>
-                        <p className="text-[#e7eefc]/70 text-lg">Design your workout routine</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Plan Builder</p>
+                        <h1 className="text-[#e7eefc] text-3xl sm:text-4xl font-bold mb-2">Create Custom Plan</h1>
+                        <p className="text-[#c8d6f4] text-base sm:text-lg max-w-2xl">Design a structured routine with clear goals, balanced sessions, and progressive overload.</p>
                     </div>
 
                     <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-[#2a3d6a] mb-6">
@@ -264,7 +268,7 @@ export default function CreatePlan() {
                     </div>
 
                     <div className="bg-[#101a37]/90 backdrop-blur-sm rounded-xl p-6 border border-[#2a3d6a]">
-                        <h3 className="text-[#e7eefc] font-bold mb-2">💡 Tips</h3>
+                        <h3 className="text-[#e7eefc] font-bold mb-2">Planning Tips</h3>
                         <ul className="text-[#e7eefc]/80 text-sm space-y-1">
                             <li>• Include rest days for recovery</li>
                             <li>• Mix different exercise types</li>

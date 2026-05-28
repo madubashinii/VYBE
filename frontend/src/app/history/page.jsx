@@ -131,18 +131,22 @@ export default function WorkoutHistory() {
     if (loading) return <p className="text-center mt-10 text-[#e7eefc] font-bold">Loading workouts...</p>;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38] relative overflow-hidden">
+            <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#ff6a00]/15 blur-3xl" />
+            <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#3fb7ff]/10 blur-3xl" />
+
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
 
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-8 border border-[#2a3d6a] rounded-3xl bg-[#0d1734]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
                     <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
                         ← Back to Dashboard
                     </Link>
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
-                            <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Workout History 📖</h1>
-                            <p className="text-[#e7eefc]/70 text-lg">Review your past workouts</p>
+                            <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Training Archive</p>
+                            <h1 className="text-[#e7eefc] text-3xl sm:text-4xl font-bold mb-2">Workout History</h1>
+                            <p className="text-[#c8d6f4] text-base sm:text-lg">Review completed sessions and analyze your long-term consistency.</p>
                         </div>
                     </div>
                 </div>
@@ -192,7 +196,9 @@ export default function WorkoutHistory() {
                     </div>
                 ) : (
                     <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-lg p-12 text-center border border-[#2a3d6a]">
-                        <div className="text-6xl mb-4">🔍</div>
+                        <div className="mx-auto mb-4 h-14 w-14 rounded-full border border-[#2a3d6a] bg-[#0f1833] flex items-center justify-center">
+                            <div className="h-2.5 w-2.5 rounded-full bg-[#ff9e1a]" />
+                        </div>
                         <h3 className="text-[#e7eefc] text-2xl font-bold mb-2">No workouts found</h3>
                         <p className="text-[#9cb0d7] mb-6">Try adjusting your filters</p>
                         <button

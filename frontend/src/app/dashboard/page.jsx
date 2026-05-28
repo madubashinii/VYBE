@@ -47,56 +47,78 @@ export default function Dashboard() {
         fetchData();
     }, []);
 
+    const statCards = [
+        { label: "Workouts", value: stats.totalUpdates, note: "this week" },
+        { label: "Hours", value: stats.avgProgress, note: "avg session" },
+        { label: "Streak", value: stats.streak, note: "days active" },
+        { label: "Rank", value: `#${stats.rank}`, note: "community" },
+    ];
+
+    const quickActions = [
+        {
+            title: "Create Plan",
+            description: "Build your next training block with clear targets.",
+            href: "/plans/create",
+            accent: "from-[#ff6a00]/20 to-[#ff6a00]/0"
+        },
+        {
+            title: "Track Progress",
+            description: "Update your numbers and monitor consistency.",
+            href: "/progress",
+            accent: "from-[#3fb7ff]/20 to-[#3fb7ff]/0"
+        },
+        {
+            title: "Workout History",
+            description: "Review sessions and spot performance trends.",
+            href: "/history",
+            accent: "from-[#7be495]/20 to-[#7be495]/0"
+        },
+    ];
+
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38] relative overflow-hidden">
+                <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#ff6a00]/15 blur-3xl" />
+                <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#3fb7ff]/10 blur-3xl" />
 
-                    <div className="mb-8">
-                        <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">
-                            Welcome Back, <span className="bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] bg-clip-text text-transparent">{user?.name}</span> 👋
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+
+                    <div className="mb-8 border border-[#2a3d6a] rounded-3xl bg-[#0d1734]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
+                        <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Dashboard</p>
+                        <h1 className="text-[#e7eefc] text-3xl sm:text-4xl font-bold mb-2">
+                            Welcome back, <span className="bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] bg-clip-text text-transparent">{user?.name || "Athlete"}</span>
                         </h1>
-                        <p className="text-[#e7eefc]/80 text-lg">Track your fitness journey</p>
+                        <p className="text-[#c8d6f4] text-base sm:text-lg max-w-2xl">
+                            Keep your momentum high with focused plans, measured progress, and consistent effort.
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-[#2a3d6a]">
-                            <p className="text-[#9cb0d7] text-xs font-semibold uppercase mb-1">Workouts</p>
-                            <p className="text-[#e7eefc] text-3xl font-bold">{stats.totalUpdates}  💪</p>
-                        </div>
-
-                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-[#2a3d6a]">
-                            <p className="text-[#9cb0d7] text-xs font-semibold uppercase mb-1">Hours</p>
-                            <p className="text-[#e7eefc] text-3xl font-bold">{stats.avgProgress} ⏱️</p>
-                        </div>
-
-                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-[#2a3d6a]">
-                            <p className="text-[#9cb0d7] text-xs font-semibold uppercase mb-1">Streak</p>
-                            <p className="text-[#e7eefc] text-3xl font-bold">{stats.streak} 🔥</p>
-                        </div>
-
-                        <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-[#2a3d6a]">
-                            <p className="text-[#9cb0d7] text-xs font-semibold uppercase mb-1">Rank</p>
-                            <p className="text-[#e7eefc] text-3xl font-bold">#{stats.rank}  🏆</p>
-                        </div>
+                        {statCards.map((card) => (
+                            <div key={card.label} className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-5 shadow-xl border border-[#2a3d6a] hover:border-[#4a639a] transition-colors">
+                                <p className="text-[#9cb0d7] text-xs font-semibold uppercase mb-2 tracking-wider">{card.label}</p>
+                                <p className="text-[#e7eefc] text-3xl font-bold leading-tight">{card.value}</p>
+                                <p className="text-[#7f95c2] text-xs mt-2 uppercase tracking-wider">{card.note}</p>
+                            </div>
+                        ))}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                        <Link href="/plans/create" className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-[#2a3d6a] hover:shadow-2xl transition-all">
-                            <h3 className="text-[#e7eefc] text-lg font-bold mb-1">📝 Create Plan</h3>
-                            <p className="text-[#9cb0d7] text-sm">Design your workout</p>
-                        </Link>
-
-                        <Link href="/progress" className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-[#2a3d6a] hover:shadow-2xl transition-all">
-                            <h3 className="text-[#e7eefc] text-lg font-bold mb-1">📊 Track Progress</h3>
-                            <p className="text-[#9cb0d7] text-sm">View improvements</p>
-                        </Link>
-
-                        <Link href="/history" className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-[#2a3d6a] hover:shadow-2xl transition-all">
-                            <h3 className="text-[#e7eefc] text-lg font-bold mb-1">📅 History</h3>
-                            <p className="text-[#9cb0d7] text-sm">Past workouts</p>
-                        </Link>
+                        {quickActions.map((action) => (
+                            <Link
+                                key={action.title}
+                                href={action.href}
+                                className="group relative bg-[#101a37]/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-[#2a3d6a] hover:border-[#4a639a] hover:shadow-2xl transition-all overflow-hidden"
+                            >
+                                <div className={`absolute inset-x-0 top-0 h-20 bg-gradient-to-b ${action.accent} pointer-events-none`} />
+                                <h3 className="text-[#e7eefc] text-lg font-bold mb-2 relative">{action.title}</h3>
+                                <p className="text-[#9cb0d7] text-sm relative">{action.description}</p>
+                                <p className="text-[#ffb067] text-xs uppercase tracking-[0.18em] mt-4 relative group-hover:text-[#ffd099] transition-colors">
+                                    Open
+                                </p>
+                            </Link>
+                        ))}
                     </div>
 
                     <div className="bg-[#101a37]/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 border border-[#2a3d6a] mb-8">
@@ -130,8 +152,15 @@ export default function Dashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {recentWorkouts.map((ex, idx) => (
                                 <div key={ex._id ?? idx} className="bg-gradient-to-br from-[#131f42] to-[#1d2d57] rounded-2xl shadow-lg p-5 border border-[#9cb0d7]/20">
-                                    <h3 className="text-white text-xl font-bold mb-2">💪 {ex.exerciseName}</h3>
-                                    <p className="text-[#d0dcf6] text-sm mb-2">{ex.current} / {ex.target}</p>
+                                    <p className="text-[#8ca2ce] text-xs uppercase tracking-wider mb-2">Recent session</p>
+                                    <h3 className="text-white text-xl font-bold mb-2">{ex.exerciseName}</h3>
+                                    <p className="text-[#d0dcf6] text-sm mb-3">{ex.current} / {ex.target}</p>
+                                    <div className="h-2 w-full rounded-full bg-[#253861] overflow-hidden mb-3">
+                                        <div
+                                            className="h-full rounded-full bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a]"
+                                            style={{ width: `${Math.max(0, Math.min(100, ex.progressPercent ?? 0))}%` }}
+                                        />
+                                    </div>
                                     <p className="text-[#b7c6e6] text-xs">
                                         {ex.progressPercent ?? 0}% complete{ex.caloriesBurned ? ` · ${ex.caloriesBurned} cal` : ""}
                                     </p>
