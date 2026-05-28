@@ -56,40 +56,32 @@ router.get("/", auth, async (req, res) => {
 // get summary stats: totalUpdates, avgProgress, streak, rank
 router.get("/stats", auth, async (req, res) => {
     try {
-        let { exerciseName, current, target, caloriesBurned } = req.body;
+        const range = req.query.range || "week";
 
-        if (!exerciseName) return res.status(400).json({ message: "exerciseName is required" });
+        let startDate = new Date();
+        if (range === "week") startDate.setDate(startDate.getDate() - 7);
+        if (range === "month") startDate.setMonth(startDate.getMonth() - 1);
+        if (range === "year") startDate.setFullYear(startDate.getFullYear() - 1);
 
-        const currNum = Number(current);
-        const targNum = Number(target);
-        if (Number.isNaN(currNum) || Number.isNaN(targNum) || targNum <= 0) {
-            return res.status(400).json({ message: "Invalid current or target values" });
-        }
-
-        let percent = Math.floor((currNum / targNum) * 100);
-        if (!Number.isFinite(percent) || percent < 0) percent = 0;
-        if (percent > 100) percent = 100;
-
-        const newProgress = new Progress({
+        const progress = await Progress.find({
             userId: req.user.id,
-            exerciseName,
-            current: currNum,
-            target: targNum,
-            progressPercent: percent,
-            caloriesBurned: Number(caloriesBurned) || 0
+            dateRecorded: { $gte: startDate }
         });
 
-        await newProgress.save();
-        res.json(newProgress);
+        const totalUpdates = progress.length;
+        const avgProgress = totalUpdates
+            ? Math.round(progress.reduce((sum, p) => sum + (Number(p.progressPercent) || 0), 0) / totalUpdates)
+            : 0;
+
         let streak = 0;
         if (progress.length > 0) {
-
-            const sorted = [...progress].sort((a, b) => b.dateRecorded - a.dateRecorded);
+            const uniqueDates = [...new Set(progress.map((p) => new Date(p.dateRecorded).toISOString().slice(0, 10)))];
+            const sorted = uniqueDates.sort((a, b) => new Date(b) - new Date(a));
 
             streak = 1;
             for (let i = 1; i < sorted.length; i++) {
-                const prev = new Date(sorted[i - 1].dateRecorded);
-                const curr = new Date(sorted[i].dateRecorded);
+                const prev = new Date(sorted[i - 1]);
+                const curr = new Date(sorted[i]);
                 const diffDays = Math.floor((prev - curr) / (1000 * 60 * 60 * 24));
                 if (diffDays === 1) streak++;
                 else break;

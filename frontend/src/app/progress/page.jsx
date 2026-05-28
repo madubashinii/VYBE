@@ -85,17 +85,36 @@ export default function ProgressPage() {
         async function loadAll() {
             setLoading(true);
             try {
-                const [prog, st, wk, pr] = await Promise.all([
+                const [prog, st, wk, pr] = await Promise.allSettled([
                     api.getProgress(timeRange),
                     api.getStats(timeRange),
                     api.getWeekly(timeRange),
                     api.getPRs(timeRange),
                 ]);
                 if (!mounted) return;
-                setProgressData(Array.isArray(prog) ? prog.reverse() : []);
-                setStats(st);
-                setWeekly(Array.isArray(wk) ? wk : []);
-                setPrs(Array.isArray(pr) ? pr : []);
+                setProgressData(
+                    prog.status === "fulfilled" && Array.isArray(prog.value)
+                        ? prog.value.reverse()
+                        : []
+                );
+                setStats(st.status === "fulfilled" ? st.value : null);
+                setWeekly(
+                    wk.status === "fulfilled" && Array.isArray(wk.value)
+                        ? wk.value
+                        : []
+                );
+                setPrs(
+                    pr.status === "fulfilled" && Array.isArray(pr.value)
+                        ? pr.value
+                        : []
+                );
+
+                [prog, st, wk, pr].forEach((result, idx) => {
+                    if (result.status === "rejected") {
+                        const names = ["progress", "stats", "weekly", "prs"];
+                        console.error(`Failed to load ${names[idx]}:`, result.reason);
+                    }
+                });
             } catch (err) {
                 console.error("Load error:", err);
             } finally {
@@ -111,16 +130,28 @@ export default function ProgressPage() {
     const reload = async () => {
         setLoading(true);
         try {
-            const [prog, st, wk, pr] = await Promise.all([
+            const [prog, st, wk, pr] = await Promise.allSettled([
                 api.getProgress(timeRange),
                 api.getStats(timeRange),
                 api.getWeekly(timeRange),
                 api.getPRs(timeRange),
             ]);
-            setProgressData(Array.isArray(prog) ? prog.reverse() : []);
-            setStats(st);
-            setWeekly(Array.isArray(wk) ? wk : []);
-            setPrs(Array.isArray(pr) ? pr : []);
+            setProgressData(
+                prog.status === "fulfilled" && Array.isArray(prog.value)
+                    ? prog.value.reverse()
+                    : []
+            );
+            setStats(st.status === "fulfilled" ? st.value : null);
+            setWeekly(
+                wk.status === "fulfilled" && Array.isArray(wk.value)
+                    ? wk.value
+                    : []
+            );
+            setPrs(
+                pr.status === "fulfilled" && Array.isArray(pr.value)
+                    ? pr.value
+                    : []
+            );
         } catch (err) {
             console.error(err);
         } finally {
@@ -163,16 +194,20 @@ export default function ProgressPage() {
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38]">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="mb-8">
+            <div className="min-h-screen bg-gradient-to-br from-[#070b1a] via-[#0b132b] to-[#111b38] relative overflow-hidden">
+                <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#ff6a00]/15 blur-3xl" />
+                <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#3fb7ff]/10 blur-3xl" />
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+                    <div className="mb-8 border border-[#2a3d6a] rounded-3xl bg-[#0d1734]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
                         <Link href="/dashboard" className="inline-flex items-center gap-2 text-[#e7eefc] hover:text-[#ff6a00] font-semibold mb-4">
                             ← Back to Dashboard
                         </Link>
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                             <div>
-                                <h1 className="text-[#e7eefc] text-4xl font-bold mb-2">Your Progress</h1>
-                                <p className="text-[#e7eefc]/70 text-lg">Track your fitness journey</p>
+                                <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-3">Progress Hub</p>
+                                <h1 className="text-[#e7eefc] text-3xl sm:text-4xl font-bold mb-2">Your Progress</h1>
+                                <p className="text-[#c8d6f4] text-base sm:text-lg">Track performance trends, update entries, and stay consistent.</p>
                             </div>
 
                             <div className="flex gap-2 bg-[#101a37]/90 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border border-[#2a3d6a]">
