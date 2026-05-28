@@ -1,6 +1,6 @@
 "use client";
 
-import ProtectedRoute from "../../../components/ProtectedRoute";
+import ProtectedRoute from "../../../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../../services/api";
