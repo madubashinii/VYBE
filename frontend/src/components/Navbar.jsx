@@ -56,7 +56,7 @@ export default function Navbar() {
 
                 <div className="hidden lg:flex items-center gap-2">
                     <NavItem href="/" label="Home" />
-                    {loggedIn && <NavItem href="/dashboard" label="Dashboard" />}
+                    {loggedIn && userRole !== "admin" && <NavItem href="/dashboard" label="Dashboard" />}
                     {loggedIn && userRole === "admin" && <NavItem href="/admin" label="Admin" />}
 
                     {loggedIn && (
@@ -125,7 +125,7 @@ export default function Navbar() {
             >
                 <div className="space-y-2 border-t border-[#2a3d6a] bg-[#101a37]/95 px-4 pb-4 backdrop-blur-xl">
                     <MobileLink href="/" label="Home" onClick={() => setMobileMenuOpen(false)} />
-                    {loggedIn && (
+                    {loggedIn && userRole !== "admin" && (
                         <MobileLink href="/dashboard" label="Dashboard" onClick={() => setMobileMenuOpen(false)} />
                     )}
                     {loggedIn && userRole === "admin" && (

@@ -25,7 +25,8 @@ export default function Login() {
             localStorage.setItem("user", JSON.stringify(response.data.user));
 
             alert("Login successful!");
-            router.push("/dashboard");
+            const nextRoute = response.data.user?.role === "admin" ? "/admin/dashboard" : "/dashboard";
+            router.push(nextRoute);
         } catch (err) {
             console.error(err.response?.data || err.message);
             alert(err.response?.data?.message || "Login failed");
