@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import api from "../../services/api";
 
 export default function Register() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -20,13 +23,40 @@ export default function Register() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const validateStepOne = () => {
+        if (!formData.name.trim()) return "Please enter your full name.";
+        if (!formData.email.trim()) return "Please enter your email address.";
+        if (!formData.password.trim()) return "Please create a password.";
+        if (formData.password.trim().length < 6) return "Password must be at least 6 characters.";
+        return "";
+    };
+
+    const validateStepTwo = () => {
+        if (!formData.weight || Number(formData.weight) <= 0) return "Please enter a valid weight.";
+        if (!formData.height || Number(formData.height) <= 0) return "Please enter a valid height.";
+        if (!formData.age || Number(formData.age) <= 0) return "Please enter a valid age.";
+        return "";
+    };
+
+    const goToStepTwo = () => {
+        const error = validateStepOne();
+        if (error) {
+            alert(error);
+            return;
+        }
+
+        setStep(2);
+    };
+
     const handleSubmit = async () => {
-        if (!formData.name || !formData.email || !formData.password) {
-            alert("Please complete name, email and password");
+        const error = validateStepTwo();
+        if (error) {
+            alert(error);
             return;
         }
 
         try {
+            setLoading(true);
             const response = await api.post(
                 "/auth/register",
                 formData
@@ -34,10 +64,12 @@ export default function Register() {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("user", JSON.stringify(response.data.user));
             alert("Registration complete!");
-            window.location.href = response.data.user?.role === "admin" ? "/admin/dashboard" : "/dashboard";
+            router.push(response.data.user?.role === "admin" ? "/admin/dashboard" : "/dashboard");
         } catch (err) {
             console.log(err.response?.data || err.message);
             alert(err.response?.data?.message || "Registration failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -68,6 +100,15 @@ export default function Register() {
                         <p className="text-[#9cb0d7] text-xs">
                             {step === 1 ? "Join VYBE and start your fitness journey" : "Tell us more about yourself"}
                         </p>
+                    </div>
+
+                    <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-[#2a3d6a] bg-[#0b1228] p-1 text-xs font-semibold">
+                        <div className={`rounded-xl px-3 py-2 text-center transition-all ${step === 1 ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-[#130b05]" : "text-[#8ea4ce]"}`}>
+                            1. Account
+                        </div>
+                        <div className={`rounded-xl px-3 py-2 text-center transition-all ${step === 2 ? "bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] text-[#130b05]" : "text-[#8ea4ce]"}`}>
+                            2. Personal Info
+                        </div>
                     </div>
 
                     {/* account Info */}
@@ -135,12 +176,12 @@ export default function Register() {
                             </div>
 
                             <button
-                                type="submit"
-                                onClick={() => setStep(2)}
+                                type="button"
+                                onClick={goToStepTwo}
                                 className="relative group mt-1 overflow-hidden rounded-2xl bg-gradient-to-r from-[#ff6a00] via-[#ff9e1a] to-[#ff6a00] py-3 text-sm font-semibold text-[#130b05] shadow-lg transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl"
                             >
                                 <span className="relative z-10 flex items-center justify-center gap-2">
-                                    Next
+                                    Continue to profile setup
                                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
@@ -153,6 +194,14 @@ export default function Register() {
                     {/* personal Info */}
                     {step === 2 && (
                         <div className="flex flex-col gap-2.5 sm:gap-3">
+
+                            <div className="rounded-2xl border border-[#2a3d6a] bg-[#0b1228] p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-[#9cb0d7] mb-2">Profile summary</p>
+                                <div className="space-y-1 text-sm text-[#e7eefc]">
+                                    <p><span className="text-[#8ea4ce]">Name:</span> {formData.name || "Not set"}</p>
+                                    <p><span className="text-[#8ea4ce]">Email:</span> {formData.email || "Not set"}</p>
+                                </div>
+                            </div>
 
                             <div className="relative group">
                                 <label className="block text-[#d9e5ff] text-xs font-semibold mb-1.5">Weight (kg)</label>
@@ -216,10 +265,11 @@ export default function Register() {
 
                             <button
                                 onClick={handleSubmit}
+                                disabled={loading}
                                 className="relative group mt-1 overflow-hidden rounded-2xl bg-gradient-to-r from-[#ff6a00] via-[#ff9e1a] to-[#ff6a00] py-3 text-sm font-semibold text-[#130b05] shadow-lg transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl"
                             >
                                 <span className="relative z-10 flex items-center justify-center gap-2">
-                                    Finish Registration
+                                    {loading ? "Creating your account..." : "Finish Registration"}
                                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
@@ -228,6 +278,7 @@ export default function Register() {
                             </button>
 
                             <button
+                                type="button"
                                 onClick={() => setStep(1)}
                                 className="text-[#ff9e1a] hover:text-[#ff6a00] font-semibold text-sm transition-colors"
                             >

@@ -14,8 +14,16 @@ export default function ForgotPassword() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const isValidEmail = (value) => /[^\s@]+@[^\s@]+\.[^\s@]+/.test(value);
+
     const requestReset = async (e) => {
         e.preventDefault();
+
+        if (!isValidEmail(email)) {
+            setMessage("Please enter a valid email address.");
+            return;
+        }
+
         setLoading(true);
         setMessage("");
 
@@ -24,13 +32,10 @@ export default function ForgotPassword() {
             const nextToken = res.data?.resetToken ?? "";
             setIssuedToken(nextToken);
             setToken(nextToken);
+            setMessage(res.data?.message || "If an account exists, reset instructions have been sent.");
 
             if (nextToken) {
                 setStep("reset");
-                setMessage("Reset token generated. Use it below to set a new password.");
-            } else {
-                setStep("request");
-                setMessage(res.data?.message || "If the account exists, reset instructions have been sent.");
             }
         } catch (err) {
             setMessage(err.response?.data?.message || "Unable to generate reset token.");
@@ -107,6 +112,7 @@ export default function ForgotPassword() {
                                     type="text"
                                     value={token}
                                     onChange={(e) => setToken(e.target.value)}
+                                    placeholder="Paste your token here"
                                     className="w-full rounded-xl border-2 border-[#2a3d6a] bg-[#0b1228] px-4 py-3 text-[#e7eefc] outline-none focus:border-[#ff6a00]"
                                 />
                             </div>
@@ -117,6 +123,7 @@ export default function ForgotPassword() {
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="At least 6 characters"
                                         className="w-full rounded-xl border-2 border-[#2a3d6a] bg-[#0b1228] px-4 py-3 text-[#e7eefc] outline-none focus:border-[#ff6a00]"
                                     />
                                 </div>
@@ -126,6 +133,7 @@ export default function ForgotPassword() {
                                         type="password"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="Re-enter password"
                                         className="w-full rounded-xl border-2 border-[#2a3d6a] bg-[#0b1228] px-4 py-3 text-[#e7eefc] outline-none focus:border-[#ff6a00]"
                                     />
                                 </div>
@@ -141,6 +149,14 @@ export default function ForgotPassword() {
                                 className="w-full rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff9e1a] px-6 py-3 font-semibold text-white shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
                             >
                                 {loading ? "Updating..." : "Reset password"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setStep("request")}
+                                className="w-full rounded-2xl border border-[#2a3d6a] bg-transparent px-6 py-3 font-semibold text-[#e7eefc] transition-colors hover:border-[#ff6a00] hover:text-[#ff9e1a]"
+                            >
+                                Use a different email
                             </button>
                         </form>
                     )}

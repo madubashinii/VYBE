@@ -28,7 +28,7 @@ const serializeUser = (user) => {
 
 router.post("/register", async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, weight, height, age } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Name, email and password are required" });
@@ -43,7 +43,15 @@ router.post("/register", async (req, res) => {
 
         const hashed = await hash(password, 10);
 
-        const user = await User.create({ name, email, password: hashed, role: "user" });
+        const user = await User.create({
+            name,
+            email,
+            password: hashed,
+            role: "user",
+            weight: weight !== undefined && weight !== "" ? Number(weight) : undefined,
+            height: height !== undefined && height !== "" ? Number(height) : undefined,
+            age: age !== undefined && age !== "" ? Number(age) : undefined,
+        });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -81,19 +89,23 @@ router.post("/forgot-password", async (req, res) => {
         if (!email) return res.status(400).json({ message: "Email is required" });
 
         const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ message: "No account found for that email" });
+
+        const isProduction = process.env.NODE_ENV === "production";
+        const responseMessage = isProduction
+            ? "If an account exists for that email, password reset instructions have been sent."
+            : "Reset token generated";
+
+        if (!user) {
+            return res.json({ message: responseMessage });
+        }
 
         const resetToken = crypto.randomBytes(32).toString("hex");
         user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
         user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save();
 
-        const isProduction = process.env.NODE_ENV === "production";
-
         res.json({
-            message: isProduction
-                ? "If an account exists for that email, password reset instructions have been sent."
-                : "Reset token generated",
+            message: responseMessage,
             ...(isProduction ? {} : { resetToken }),
         });
     } catch (err) {
@@ -209,7 +221,7 @@ router.put("/profile", auth, async (req, res) => {
         }
 
         if (req.body.email && req.body.email !== currentUser.email) {
-            const emailExists = await User.findOne({ email: req.body.email, _id: { $ne: req.userId } });
+            const emailExists = await User.findOne({ email: req.body.email, _id: { $ne: userId } });
             if (emailExists) {
                 return res.status(400).json({ message: "Email already exists" });
             }
@@ -248,7 +260,7 @@ router.put("/profile/plan", auth, async (req, res) => {
 
         if (!plan) {
             plan = await Plan.create({
-                userId: req.userId,
+                userId,
                 name: name ?? "My Plan",
                 description: description ?? "",
                 duration: Number(duration) || 4,
